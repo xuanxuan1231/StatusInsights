@@ -65,6 +65,9 @@ function renderDevices(devices) {
     const card = document.createElement("div");
     card.className = "device-card";
 
+    const topRow = document.createElement("div");
+    topRow.className = "device-top-row";
+
     const image = document.createElement("img");
     image.className = "device-image";
     const imageSrc = deviceImageSource(device.device_type);
@@ -72,8 +75,14 @@ function renderDevices(devices) {
       image.src = imageSrc;
       image.alt = `${device.device_type || "device"} icon`;
       image.loading = "lazy";
-      card.appendChild(image);
+      topRow.appendChild(image);
     }
+
+    const status = document.createElement("div");
+    status.className = "device-status badge";
+    status.textContent = device.status || "无状态";
+    setBadgeClass(status, statusTone(device.status));
+    topRow.appendChild(status);
 
     const name = document.createElement("div");
     name.className = "device-name";
@@ -87,15 +96,10 @@ function renderDevices(devices) {
     usage.className = "device-usage";
     usage.textContent = "正在使用";
 
-    const status = document.createElement("div");
-    status.className = "device-status";
-    status.textContent = device.status || "无状态";
-    setBadgeClass(status, statusTone(device.status));
-
+    card.appendChild(topRow);
     card.appendChild(name);
     card.appendChild(description);
     card.appendChild(usage);
-    card.appendChild(status);
     deviceListEl.appendChild(card);
   });
 }
