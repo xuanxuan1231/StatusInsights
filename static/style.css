@@ -67,6 +67,14 @@ h1 {
   padding: 24px;
   box-shadow: var(--shadow);
   backdrop-filter: blur(14px);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.55);
 }
 
 .card-header {
@@ -153,13 +161,24 @@ h1 {
 }
 
 .device-card {
-  background: var(--card-soft);
-  border-radius: 16px;
-  padding: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-height: 160px;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.device-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.55);
 }
 
 .device-image {
@@ -172,12 +191,13 @@ h1 {
 }
 
 .device-name {
-  font-size: 18px;
+  font-size: 28px;
   font-weight: 600;
 }
 
 .device-description {
   margin-top: 0;
+  font-size: 20px;
 }
 
 .device-usage {
@@ -227,5 +247,18 @@ h1 {
   .hero {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .device-card {
+    transition: none;
+  }
+
+  .card:hover,
+  .device-card:hover {
+    transform: none;
+    box-shadow: var(--shadow);
   }
 }
