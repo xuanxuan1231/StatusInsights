@@ -44,10 +44,10 @@ function statusTone(value) {
 
 function deviceImageSource(type) {
   const value = (type || "").toLowerCase();
-  if (value === "ios" || value === "mac") return "/static/mac-apple.svg";
-  if (value === "android") return "/static/android-android.svg";
-  if (value === "linux") return "/static/linux-linux.svg";
-  if (value === "win") return "/static/win-win.svg";
+  if (value === "ios" || value === "mac") return "/static/apple.svg";
+  if (value === "android") return "/static/android.svg";
+  if (value === "linux") return "/static/linux.svg";
+  if (value === "win") return "/static/win.svg";
   return "";
 }
 
