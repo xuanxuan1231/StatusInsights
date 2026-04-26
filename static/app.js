@@ -83,6 +83,9 @@ function renderDevices(devices) {
     description.className = "device-description caption";
     description.textContent = device.description || "暂无描述";
 
+    const divider = document.createElement("div");
+    divider.className = "device-divider";
+
     const usage = document.createElement("div");
     usage.className = "device-usage";
     usage.textContent = "正在使用";
@@ -94,6 +97,7 @@ function renderDevices(devices) {
 
     card.appendChild(name);
     card.appendChild(description);
+    card.appendChild(divider);
     card.appendChild(usage);
     card.appendChild(status);
     deviceListEl.appendChild(card);
