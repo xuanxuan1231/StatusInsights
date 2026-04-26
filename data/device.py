@@ -1,26 +1,40 @@
 import pymongo
-import os
+import time
 from typing import Optional
 
-MONGODB_ENABLED = os.environ.get('MONGODB_ENABLED', False)
+from data.config import MONGODB_ENABLED, MONGODB_URI, DEVICE_CACHE_TTL_SECONDS
+
+
 DEVICES = []
+CACHE_TTL_SECONDS = int(DEVICE_CACHE_TTL_SECONDS)
+_LAST_REFRESH = 0.0
 
 if MONGODB_ENABLED:
-    client = pymongo.MongoClient(os.environ['MONGODB_URI'])
-    db = client['status-insights']
-    collection = db['devices']
+    mongo_uri = MONGODB_URI
+    if not mongo_uri:
+        print("MONGODB_ENABLED is set but MONGODB_URI is missing; disabling MongoDB.")
+        MONGODB_ENABLED = False
+    else:
+        client = pymongo.MongoClient(mongo_uri)
+        db = client["status-insights"]
+        collection = db["devices"]
 
-    def update():
-        global DEVICES
-        device_list = []
-        try:
-            for device in collection.find():
-                device_list.append(device)
-            DEVICES = device_list
-        except Exception as e:
-            print(f"Failed to update devices: {e}")
-            DEVICES = []
-    update()
+
+def update(force: bool = False) -> None:
+    global DEVICES, _LAST_REFRESH
+    if not MONGODB_ENABLED:
+        return
+    now = time.time()
+    if not force and _LAST_REFRESH and (now - _LAST_REFRESH) < CACHE_TTL_SECONDS:
+        return
+    device_list = []
+    try:
+        for device in collection.find():
+            device_list.append(device)
+        DEVICES = device_list
+        _LAST_REFRESH = now
+    except Exception as e:
+        print(f"Failed to update devices: {e}")
 
 def register(name: str, device_id: str, device_type: str, description: Optional[str]) -> None:
     """
@@ -48,7 +62,7 @@ def register(name: str, device_id: str, device_type: str, description: Optional[
     if MONGODB_ENABLED:
         result = collection.insert_one(device_document)
         print(result)
-        update()
+        update(force=True)
     else:
         DEVICES.append(device_document)
 
@@ -66,7 +80,7 @@ def unregister(device_id: str):
             if device['id'] == device_id:
                 result = collection.delete_many({'id': device_id})
                 print(result)
-                update()
+                update(force=True)
                 return
         raise RuntimeError(f"Device with id {device_id} not found.")
     else:
@@ -90,3 +104,9 @@ def get(device_id: str) -> Optional[dict]:
         if device['id'] == device_id:
             return device
     raise RuntimeError(f"Device with id {device_id} not found.")
+
+def get_all() -> list[dict]:
+    global DEVICES
+    if MONGODB_ENABLED:
+        update()
+    return DEVICES

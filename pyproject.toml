@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]>=0.136.1",
+    "pydantic>=2.13.3",
     "pymongo[srv]>=4.17.0",
 ]
 [tool.fastapi]
