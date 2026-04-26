@@ -160,13 +160,6 @@ h1 {
   flex-direction: column;
   gap: 8px;
   min-height: 160px;
-  align-items: flex-start;
-}
-
-.device-top-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 .device-image {
@@ -175,6 +168,7 @@ h1 {
   object-fit: contain;
   border-radius: 12px;
   background: rgba(108, 140, 255, 0.08);
+  align-self: flex-start;
 }
 
 .device-name {
@@ -193,7 +187,7 @@ h1 {
 }
 
 .device-status {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 600;
 }
 
