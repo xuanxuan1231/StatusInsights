@@ -42,14 +42,13 @@ function statusTone(value) {
   return "success";
 }
 
-function deviceIcon(type) {
+function deviceImageSource(type) {
   const value = (type || "").toLowerCase();
-  if (value === "win") return "WIN";
-  if (value === "mac") return "MAC";
-  if (value === "linux") return "LIN";
-  if (value === "ios") return "IOS";
-  if (value === "android") return "AND";
-  return "PC";
+  if (value === "ios" || value === "mac") return "/static/mac-apple.svg";
+  if (value === "android") return "/static/android-android.svg";
+  if (value === "linux") return "/static/linux-linux.svg";
+  if (value === "win") return "/static/win-win.svg";
+  return "";
 }
 
 function renderDevices(devices) {
@@ -66,33 +65,37 @@ function renderDevices(devices) {
     const card = document.createElement("div");
     card.className = "device-card";
 
-    const header = document.createElement("div");
-    header.className = "device-header";
+    const image = document.createElement("img");
+    image.className = "device-image";
+    const imageSrc = deviceImageSource(device.device_type);
+    if (imageSrc) {
+      image.src = imageSrc;
+      image.alt = `${device.device_type || "device"} icon`;
+      image.loading = "lazy";
+      card.appendChild(image);
+    }
 
-    const icon = document.createElement("span");
-    icon.className = "device-icon";
-    icon.textContent = deviceIcon(device.device_type);
+    const name = document.createElement("div");
+    name.className = "device-name";
+    name.textContent = device.name || device.device_id;
 
-    const title = document.createElement("div");
-    title.className = "device-title";
-    title.textContent = device.name || device.device_id;
+    const description = document.createElement("div");
+    description.className = "device-description caption";
+    description.textContent = device.description || "暂无描述";
 
-    header.appendChild(icon);
-    header.appendChild(title);
+    const usage = document.createElement("div");
+    usage.className = "device-usage";
+    usage.textContent = "正在使用";
 
-    const badge = document.createElement("span");
-    badge.className = "badge";
-    badge.textContent = device.status || "无状态";
-    setBadgeClass(badge, statusTone(device.status));
+    const status = document.createElement("div");
+    status.className = "device-status";
+    status.textContent = device.status || "无状态";
+    setBadgeClass(status, statusTone(device.status));
 
-    const meta = document.createElement("div");
-    meta.className = "device-meta";
-    const description = device.description ? ` - ${device.description}` : "";
-    meta.textContent = `${device.device_type}${description}`;
-
-    card.appendChild(header);
-    card.appendChild(badge);
-    card.appendChild(meta);
+    card.appendChild(name);
+    card.appendChild(description);
+    card.appendChild(usage);
+    card.appendChild(status);
     deviceListEl.appendChild(card);
   });
 }

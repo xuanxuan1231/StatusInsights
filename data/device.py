@@ -20,6 +20,16 @@ if MONGODB_ENABLED:
         collection = db["devices"]
 
 
+def _normalize_device(device: dict) -> Optional[dict]:
+    if not isinstance(device, dict):
+        return None
+    if 'id' not in device:
+        return None
+    if 'name' not in device or 'type' not in device:
+        return None
+    return device
+
+
 def update(force: bool = False) -> None:
     global DEVICES, _LAST_REFRESH
     if not MONGODB_ENABLED:
@@ -30,7 +40,9 @@ def update(force: bool = False) -> None:
     device_list = []
     try:
         for device in collection.find():
-            device_list.append(device)
+            normalized = _normalize_device(device)
+            if normalized is not None:
+                device_list.append(normalized)
         DEVICES = device_list
         _LAST_REFRESH = now
     except Exception as e:
@@ -109,4 +121,4 @@ def get_all() -> list[dict]:
     global DEVICES
     if MONGODB_ENABLED:
         update()
-    return DEVICES
+    return [device for device in DEVICES if _normalize_device(device) is not None]

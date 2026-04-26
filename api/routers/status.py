@@ -75,10 +75,12 @@ def get_device_status(device_id: str):
 def get_summary():
     person_status, person_description = status_data.get_person_status()
     online_statuses = status_data.get_all_device_statuses(online_only=True)
-    status_map = {item['id']: item.get('status') for item in online_statuses}
+    status_map = {item['id']: item.get('status') for item in online_statuses if 'id' in item}
     online_ids = set(status_map.keys())
     device_summaries: list[DeviceSummary] = []
     for device in get_all_devices():
+        if not isinstance(device, dict) or 'id' not in device:
+            continue
         if device['id'] not in online_ids:
             continue
         device_summaries.append(
