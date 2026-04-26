@@ -7,8 +7,19 @@ from data.config import DEVICE_OFFLINE_THRESHOLD_SECONDS
 DEVICE_STATUSES: list[dict[str, object]] = []
 PERSON_STATUS: tuple[str, Optional[str]] = ('无状态', '还没有设置状态诶（')
 
+
+def _sanitize_statuses() -> None:
+    global DEVICE_STATUSES
+    # Drop malformed entries to avoid KeyError during summary or lookups.
+    DEVICE_STATUSES = [
+        status for status in DEVICE_STATUSES
+        if isinstance(status, dict) and 'id' in status
+    ]
+
+
 def set_device_status(device_id: str, status: str):
     global DEVICE_STATUSES
+    _sanitize_statuses()
     get_device(device_id) # 检查设备是否已经注册
     now = time.time()
     for device_status in DEVICE_STATUSES:
@@ -20,6 +31,7 @@ def set_device_status(device_id: str, status: str):
 
 def get_device_status(device_id: str) -> Optional[dict[str, object]]:
     global DEVICE_STATUSES
+    _sanitize_statuses()
     for device_status in DEVICE_STATUSES:
         if device_status['id'] == device_id:
             return device_status
@@ -42,6 +54,7 @@ def _is_online(device_status: dict[str, object], now: float) -> bool:
 
 def get_all_device_statuses(online_only: bool = False) -> list[dict[str, object]]:
     global DEVICE_STATUSES
+    _sanitize_statuses()
     statuses = list(DEVICE_STATUSES)
     if not online_only:
         return statuses
