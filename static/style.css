@@ -97,7 +97,7 @@ h1 {
 
 .caption {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 20px;
   line-height: 1.5;
   margin-top: 0;
 }
@@ -109,7 +109,7 @@ h1 {
 }
 
 .person-status-text {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
   margin-top: 0;
 }
@@ -197,7 +197,7 @@ h1 {
 
 .device-description {
   margin-top: 0;
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .device-divider {
