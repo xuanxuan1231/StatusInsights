@@ -29,12 +29,12 @@ router = APIRouter(prefix='/status', tags=['status'])
 
 
 @router.post('/person/set', dependencies=[Depends(require_api_key)],status_code=201)
-def set_person_status(status: str, description: Optional[str]):
+def set_person_status(status: PersonStatus):
     """
     设置人的状态。
     :return:
     """
-    status_data.set_person_status(status, description)
+    status_data.set_person_status(status.status, status.description)
 
 
 @router.get('/person/get')
