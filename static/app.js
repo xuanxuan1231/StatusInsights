@@ -9,6 +9,9 @@ const deviceEmptyEl = document.getElementById("device-empty");
 const deviceCountEl = document.getElementById("device-count");
 const lastUpdatedEl = document.getElementById("last-updated");
 const pulseEl = document.getElementById("pulse");
+let requestSeq = 0;
+let lastRenderedSeq = 0;
+let currentController = null;
 
 function applyCustomFont() {
   const params = new URLSearchParams(window.location.search);
@@ -118,18 +121,39 @@ function renderSummary(summary) {
 }
 
 async function loadSummary() {
+  requestSeq += 1;
+  const seq = requestSeq;
+  if (currentController) {
+    currentController.abort();
+  }
+  currentController = new AbortController();
   try {
-    const response = await fetch("/status/summary");
+    const response = await fetch("/status/summary", { signal: currentController.signal });
     if (!response.ok) {
       throw new Error(`Request failed: ${response.status}`);
     }
     const payload = await response.json();
+    if (seq < lastRenderedSeq) {
+      return;
+    }
+    lastRenderedSeq = seq;
     renderSummary(payload);
   } catch (error) {
+    if (error && error.name === "AbortError") {
+      return;
+    }
+    if (seq < lastRenderedSeq) {
+      return;
+    }
+    lastRenderedSeq = seq;
     personStatusEl.textContent = "加载失败";
     personDescriptionEl.textContent = "";
     renderDevices([]);
     lastUpdatedEl.textContent = "无法获取数据";
+  } finally {
+    if (seq === requestSeq) {
+      currentController = null;
+    }
   }
 }
 
