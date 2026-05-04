@@ -5,13 +5,16 @@ from data.device import get_all as get_all_devices
 from typing import Optional
 from pydantic import BaseModel
 
+
 class DeviceStatusRequest(BaseModel):
     device_id: str
     status: str
 
+
 class PersonStatus(BaseModel):
     status: str
     description: Optional[str]
+
 
 class DeviceSummary(BaseModel):
     device_id: str
@@ -20,15 +23,17 @@ class DeviceSummary(BaseModel):
     description: Optional[str]
     status: Optional[str]
 
+
 class SummaryResponse(BaseModel):
     name: str
     person: PersonStatus
     devices: list[DeviceSummary]
 
+
 router = APIRouter(prefix='/status', tags=['status'])
 
 
-@router.post('/person/set', dependencies=[Depends(require_api_key)],status_code=201)
+@router.post('/person/set', dependencies=[Depends(require_api_key)], status_code=201)
 def set_person_status(status: PersonStatus):
     """
     设置人的状态。

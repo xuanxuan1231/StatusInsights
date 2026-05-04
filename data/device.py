@@ -4,7 +4,6 @@ from typing import Optional
 
 from data.config import MONGODB_ENABLED, MONGODB_URI, DEVICE_CACHE_TTL_SECONDS
 
-
 DEVICES = []
 CACHE_TTL_SECONDS = int(DEVICE_CACHE_TTL_SECONDS)
 _LAST_REFRESH = 0.0
@@ -47,6 +46,7 @@ def update(force: bool = False) -> None:
         _LAST_REFRESH = now
     except Exception as e:
         print(f"Failed to update devices: {e}")
+
 
 def register(name: str, device_id: str, device_type: str, description: Optional[str]) -> None:
     """
@@ -103,6 +103,7 @@ def unregister(device_id: str):
                 return
         raise RuntimeError(f"Device with id {device_id} not found.")
 
+
 def get(device_id: str) -> Optional[dict]:
     """
     从数据库中获取一个设备的信息。
@@ -116,6 +117,7 @@ def get(device_id: str) -> Optional[dict]:
         if device['id'] == device_id:
             return device
     raise RuntimeError(f"Device with id {device_id} not found.")
+
 
 def get_all() -> list[dict]:
     global DEVICES

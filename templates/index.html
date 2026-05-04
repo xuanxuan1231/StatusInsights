@@ -1,54 +1,54 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Status Insights</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" />
-  <link rel="stylesheet" href="/static/style.css" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Status Insights</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"/>
+    <link rel="stylesheet" href="/static/style.css"/>
 </head>
 <body>
-  <div class="page">
+<div class="page">
     <header class="hero">
-      <div>
-        <p class="eyebrow">Status Insights</p>
-        <h1 id="name">--</h1>
-      </div>
-      <div class="refresh">
-        <span class="dot" id="pulse"></span>
-        <span id="last-updated">等待刷新</span>
-      </div>
+        <div>
+            <p class="eyebrow">Status Insights</p>
+            <h1 id="name">--</h1>
+        </div>
+        <div class="refresh">
+            <span class="dot" id="pulse"></span>
+            <span id="last-updated">等待刷新</span>
+        </div>
     </header>
 
     <main class="stack">
-      <section class="card person">
-        <div class="person-status-text" id="person-status">--</div>
-        <p class="caption" id="person-description">--</p>
-      </section>
+        <section class="card person">
+            <div class="person-status-text" id="person-status">--</div>
+            <p class="caption" id="person-description">--</p>
+        </section>
 
-      <section class="device-section" id="device-section" aria-labelledby="device-title">
-        <div class="device-header-row">
-          <h2 id="device-title" class="section-title">设备状态</h2>
-          <span class="badge neutral" id="device-count">0</span>
-        </div>
-        <div id="device-list" class="device-grid"></div>
-      </section>
+        <section class="device-section" id="device-section" aria-labelledby="device-title">
+            <div class="device-header-row">
+                <h2 id="device-title" class="section-title">设备状态</h2>
+                <span class="badge neutral" id="device-count">0</span>
+            </div>
+            <div id="device-list" class="device-grid"></div>
+        </section>
 
-      <p class="caption empty-state" id="device-empty">无在线设备</p>
+        <p class="caption empty-state" id="device-empty">无在线设备</p>
     </main>
 
     <footer class="site-footer">
-      <div class="footer-content">
-        <span>(c) 2026 Wenxuan Shen</span>
-        <span class="footer-sep">·</span>
-        <span>在 MIT Licence 下开源</span>
-      </div>
+        <div class="footer-content">
+            <span>(c) 2026 Wenxuan Shen</span>
+            <span class="footer-sep">·</span>
+            <span>在 MIT Licence 下开源</span>
+        </div>
     </footer>
-  </div>
+</div>
 
-  <script src="/static/app.js"></script>
+<script src="/static/app.js"></script>
 </body>
 </html>

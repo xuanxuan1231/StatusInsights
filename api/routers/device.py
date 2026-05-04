@@ -4,13 +4,16 @@ from typing import Optional
 from data.device import *
 from data.config import require_api_key
 
+
 class Device(BaseModel):
     device_id: str
     name: str
     device_type: str
     description: Optional[str]
 
+
 router = APIRouter(prefix="/device", tags=["devices"])
+
 
 @router.post('/register', status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_api_key)])
 def register_device(device: Device):
@@ -21,6 +24,7 @@ def register_device(device: Device):
         print('Failed to register device: ', e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Failed to register device.')
 
+
 @router.delete('/unregister/{device_id}', status_code=status.HTTP_200_OK, dependencies=[Depends(require_api_key)])
 def unregister_device(device_id: str):
     try:
@@ -28,6 +32,7 @@ def unregister_device(device_id: str):
     except Exception as e:
         print('Failed to unregister device: ', e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Failed to unregister device.')
+
 
 @router.get('/get')
 def get_all_devices():

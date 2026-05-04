@@ -17,5 +17,6 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 def dashboard():
     return FileResponse(BASE_DIR / "templates" / "index.html")
 
+
 app.include_router(device_router)
 app.include_router(status_router)

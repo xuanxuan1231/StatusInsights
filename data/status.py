@@ -36,7 +36,7 @@ def _sanitize_statuses() -> None:
 
 def set_device_status(device_id: str, status: str):
     global DEVICE_STATUSES
-    get_device(device_id) # 检查设备是否已经注册
+    get_device(device_id)  # 检查设备是否已经注册
     now = time.time()
     if _device_status_collection is not None:
         try:
@@ -55,6 +55,7 @@ def set_device_status(device_id: str, status: str):
             device_status['last_seen'] = now
             return
     DEVICE_STATUSES.append({'id': device_id, 'status': status, 'last_seen': now})
+
 
 def get_device_status(device_id: str) -> Optional[dict[str, object]]:
     global DEVICE_STATUSES
@@ -79,6 +80,7 @@ def get_device_status(device_id: str) -> Optional[dict[str, object]]:
             return device_status
     raise RuntimeError(f"Device with id {device_id} not found.")
 
+
 def set_person_status(status: str, description: Optional[str]):
     global PERSON_STATUS
     PERSON_STATUS = (status, description)
@@ -92,6 +94,7 @@ def set_person_status(status: str, description: Optional[str]):
         )
     except Exception as exc:
         print(f"Failed to persist person status: {exc}")
+
 
 def get_person_status() -> tuple[str, Optional[str]]:
     global PERSON_STATUS
@@ -108,6 +111,7 @@ def get_person_status() -> tuple[str, Optional[str]]:
         except Exception as exc:
             print(f"Failed to read person status from MongoDB: {exc}")
     return PERSON_STATUS
+
 
 def _is_online(device_status: dict[str, object], now: float) -> bool:
     last_seen = device_status.get('last_seen')
