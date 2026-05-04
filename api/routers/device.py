@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status, HTTPException, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from data.device import *
 from data.config import require_api_key
@@ -10,6 +10,11 @@ class Device(BaseModel):
     name: str
     device_type: str
     description: Optional[str]
+
+
+class EditDeviceRequest(BaseModel):
+    device_id: str
+    model_config = ConfigDict(extra='allow')
 
 
 router = APIRouter(prefix="/device", tags=["devices"])
@@ -41,3 +46,20 @@ def get_all_devices():
     except Exception as e:
         print('Failed to get devices: ', e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Failed to get devices.')
+
+
+@router.post('/edit', status_code=status.HTTP_200_OK, dependencies=[Depends(require_api_key)])
+def edit_device(request: EditDeviceRequest):
+    try:
+        updates = request.model_dump(exclude={'device_id'}, exclude_unset=True)
+        if not updates:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='No editable fields provided.')
+        return edit(request.device_id, updates)
+    except RuntimeError as e:
+        print('Failed to edit device: ', e)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        print('Failed to edit device: ', e)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Failed to edit device.')

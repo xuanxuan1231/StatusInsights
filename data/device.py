@@ -104,6 +104,34 @@ def unregister(device_id: str):
         raise RuntimeError(f"Device with id {device_id} not found.")
 
 
+def edit(device_id: str, updates: dict[str, object]) -> dict:
+    """
+    编辑设备信息。禁止编辑 id 与 type 字段。
+    :param device_id: 设备 GUID。
+    :param updates: 要更新的字段字典。
+    :return: 更新后的设备信息。
+    """
+    global DEVICES
+    if not isinstance(updates, dict) or not updates:
+        raise ValueError("No editable fields provided.")
+    if 'id' in updates or 'type' in updates:
+        raise ValueError("Device id and type are not editable.")
+
+    if MONGODB_ENABLED:
+        update()
+        result = collection.update_one({'id': device_id}, {'$set': updates})
+        if result.matched_count == 0:
+            raise RuntimeError(f"Device with id {device_id} not found.")
+        update(force=True)
+        return get(device_id)
+
+    for device in DEVICES:
+        if device['id'] == device_id:
+            device.update(updates)
+            return device
+    raise RuntimeError(f"Device with id {device_id} not found.")
+
+
 def get(device_id: str) -> Optional[dict]:
     """
     从数据库中获取一个设备的信息。
