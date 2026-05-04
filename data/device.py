@@ -26,7 +26,17 @@ def _normalize_device(device: dict) -> Optional[dict]:
         return None
     if 'name' not in device or 'type' not in device:
         return None
-    return device
+    normalized = {
+        'id': device['id'],
+        'name': device['name'],
+        'type': device['type'],
+        'description': device.get('description'),
+    }
+    for key, value in device.items():
+        if key in normalized or key == '_id':
+            continue
+        normalized[key] = value
+    return normalized
 
 
 def update(force: bool = False) -> None:
