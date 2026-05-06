@@ -9,6 +9,10 @@ const deviceEmptyEl = document.getElementById("device-empty");
 const deviceCountEl = document.getElementById("device-count");
 const lastUpdatedEl = document.getElementById("last-updated");
 const pulseEl = document.getElementById("pulse");
+const pageEl = document.querySelector(".page");
+const themeSelectEl = document.getElementById("theme-select");
+const THEME_STORAGE_KEY = "statusinsights-theme-mode";
+const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 let requestSeq = 0;
 let lastRenderedSeq = 0;
 let currentController = null;
@@ -52,6 +56,60 @@ function deviceImageSource(type) {
     if (value === "linux") return "/static/linux.svg";
     if (value === "win") return "/static/win.svg";
     return "";
+}
+
+function resolveTheme(mode) {
+    if (mode === "light") return "light";
+    if (mode === "dark") return "dark";
+    return mediaQuery.matches ? "dark" : "light";
+}
+
+function applyTheme(theme, animated = false) {
+    document.documentElement.setAttribute("data-theme", theme);
+    if (animated && pageEl) {
+        pageEl.classList.remove("theme-animating");
+        void pageEl.offsetWidth;
+        pageEl.classList.add("theme-animating");
+        setTimeout(() => pageEl.classList.remove("theme-animating"), 340);
+    }
+}
+
+function getSavedThemeMode() {
+    const mode = localStorage.getItem(THEME_STORAGE_KEY);
+    if (mode === "auto" || mode === "light" || mode === "dark") {
+        return mode;
+    }
+    return "auto";
+}
+
+function applyThemeMode(mode, animated = false) {
+    const theme = resolveTheme(mode);
+    applyTheme(theme, animated);
+    if (themeSelectEl) {
+        themeSelectEl.value = mode;
+    }
+}
+
+function initThemeMode() {
+    const savedMode = getSavedThemeMode();
+    applyThemeMode(savedMode, false);
+
+    if (themeSelectEl) {
+        themeSelectEl.addEventListener("change", (event) => {
+            const mode = event.target.value;
+            if (mode !== "auto" && mode !== "light" && mode !== "dark") {
+                return;
+            }
+            localStorage.setItem(THEME_STORAGE_KEY, mode);
+            applyThemeMode(mode, true);
+        });
+    }
+
+    mediaQuery.addEventListener("change", () => {
+        if (getSavedThemeMode() === "auto") {
+            applyThemeMode("auto", true);
+        }
+    });
 }
 
 function renderDevices(devices) {
@@ -158,5 +216,6 @@ async function loadSummary() {
 }
 
 applyCustomFont();
+initThemeMode();
 loadSummary();
 setInterval(loadSummary, REFRESH_MS);

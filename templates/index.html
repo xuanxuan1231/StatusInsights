@@ -17,9 +17,19 @@
             <p class="eyebrow">Status Insights</p>
             <h1 id="name">--</h1>
         </div>
-        <div class="refresh">
-            <span class="dot" id="pulse"></span>
-            <span id="last-updated">等待刷新</span>
+        <div class="hero-tools">
+            <label class="theme-switcher" for="theme-select">
+                <span class="theme-label">模式</span>
+                <select id="theme-select" aria-label="颜色模式">
+                    <option value="auto">自动</option>
+                    <option value="light">浅色</option>
+                    <option value="dark">深色</option>
+                </select>
+            </label>
+            <div class="refresh">
+                <span class="dot" id="pulse"></span>
+                <span id="last-updated">等待刷新</span>
+            </div>
         </div>
     </header>
 
