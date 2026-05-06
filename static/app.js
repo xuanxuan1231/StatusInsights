@@ -83,8 +83,10 @@ function getSavedThemeMode() {
 }
 
 function applyThemeMode(mode, animated = false) {
+    const previousTheme = document.documentElement.getAttribute("data-theme");
     const theme = resolveTheme(mode);
-    applyTheme(theme, animated);
+    const shouldAnimate = animated && previousTheme !== null && previousTheme !== theme;
+    applyTheme(theme, shouldAnimate);
     themeButtons.forEach((button) => {
         const isActive = button.dataset.themeMode === mode;
         button.classList.toggle("is-active", isActive);
