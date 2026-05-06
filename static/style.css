@@ -78,10 +78,8 @@ body {
 .theme-switcher {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    color: var(--muted);
-    font-size: 13px;
-    padding: 8px 12px;
+    gap: 6px;
+    padding: 6px;
     border: 1px solid var(--border);
     border-radius: 999px;
     background: linear-gradient(160deg, var(--card-glass-a), var(--card-glass-b));
@@ -89,22 +87,45 @@ body {
     transition: background var(--surface-transition) ease, border-color var(--surface-transition) ease, box-shadow var(--surface-transition) ease;
 }
 
-.theme-label {
-    letter-spacing: 0.03em;
-}
-
-#theme-select {
-    border: none;
-    outline: none;
+.theme-pill-btn {
+    width: 30px;
+    height: 30px;
+    border: 1px solid transparent;
+    border-radius: 999px;
     background: transparent;
     color: var(--text);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
+    line-height: 1;
+    transition: background var(--surface-transition) ease, color var(--surface-transition) ease, border-color var(--surface-transition) ease, transform 180ms ease;
 }
 
-#theme-select option {
-    color: #0f1b33;
+.theme-pill-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: block;
+    margin: 0 auto;
+}
+
+.theme-pill-btn[data-theme-mode="dark"] svg {
+    fill: currentColor;
+    stroke: none;
+}
+
+.theme-pill-btn:hover {
+    transform: translateY(-1px);
+}
+
+.theme-pill-btn.is-active {
+    background: color-mix(in srgb, var(--accent) 24%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    color: var(--accent-strong);
 }
 
 .eyebrow {

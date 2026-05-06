@@ -10,7 +10,7 @@ const deviceCountEl = document.getElementById("device-count");
 const lastUpdatedEl = document.getElementById("last-updated");
 const pulseEl = document.getElementById("pulse");
 const pageEl = document.querySelector(".page");
-const themeSelectEl = document.getElementById("theme-select");
+const themeButtons = Array.from(document.querySelectorAll(".theme-pill-btn"));
 const THEME_STORAGE_KEY = "statusinsights-theme-mode";
 const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 let requestSeq = 0;
@@ -85,25 +85,27 @@ function getSavedThemeMode() {
 function applyThemeMode(mode, animated = false) {
     const theme = resolveTheme(mode);
     applyTheme(theme, animated);
-    if (themeSelectEl) {
-        themeSelectEl.value = mode;
-    }
+    themeButtons.forEach((button) => {
+        const isActive = button.dataset.themeMode === mode;
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
 }
 
 function initThemeMode() {
     const savedMode = getSavedThemeMode();
     applyThemeMode(savedMode, false);
 
-    if (themeSelectEl) {
-        themeSelectEl.addEventListener("change", (event) => {
-            const mode = event.target.value;
+    themeButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const mode = button.dataset.themeMode;
             if (mode !== "auto" && mode !== "light" && mode !== "dark") {
                 return;
             }
             localStorage.setItem(THEME_STORAGE_KEY, mode);
             applyThemeMode(mode, true);
         });
-    }
+    });
 
     mediaQuery.addEventListener("change", () => {
         if (getSavedThemeMode() === "auto") {
