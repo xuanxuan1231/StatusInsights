@@ -78,39 +78,49 @@ body {
 .theme-switcher {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px;
+    gap: 8px;
+    padding: 6px 8px;
     border: 1px solid var(--border);
     border-radius: 999px;
     background: linear-gradient(160deg, var(--card-glass-a), var(--card-glass-b));
     box-shadow: var(--shadow);
     transition: background var(--surface-transition) ease, border-color var(--surface-transition) ease, box-shadow var(--surface-transition) ease;
+    min-height: 44px;
 }
 
 .theme-pill-btn {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    flex: 0 0 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid transparent;
     border-radius: 999px;
     background: transparent;
     color: var(--text);
-    font-size: 12px;
-    font-weight: 600;
+    appearance: none;
+    -webkit-appearance: none;
     cursor: pointer;
-    line-height: 1;
+    line-height: 0;
+    padding: 0;
+    overflow: hidden;
     transition: background var(--surface-transition) ease, color var(--surface-transition) ease, border-color var(--surface-transition) ease, transform 180ms ease;
 }
 
 .theme-pill-btn svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
     stroke: currentColor;
     fill: none;
-    stroke-width: 1.8;
+    stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
     display: block;
-    margin: 0 auto;
+    pointer-events: none;
 }
 
 .theme-pill-btn[data-theme-mode="dark"] svg {
