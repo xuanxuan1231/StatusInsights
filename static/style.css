@@ -391,6 +391,8 @@ h1 {
     .hero {
         flex-direction: column;
         align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 24px;
     }
 
     .hero-tools {
