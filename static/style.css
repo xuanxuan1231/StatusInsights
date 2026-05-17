@@ -297,6 +297,13 @@ h1 {
     box-shadow: var(--hover-shadow);
 }
 
+.device-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
 .device-image {
     width: 48px;
     height: 48px;
@@ -305,6 +312,59 @@ h1 {
     background: color-mix(in srgb, var(--accent) 12%, transparent);
     align-self: flex-start;
     transition: background var(--surface-transition) ease;
+}
+
+.device-battery {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--card-glass-a) 95%, transparent), color-mix(in srgb, var(--card-glass-b) 92%, transparent));
+    backdrop-filter: blur(8px);
+}
+
+.battery-icon {
+    width: 30px;
+    height: 18px;
+    display: block;
+}
+
+.battery-shell {
+    fill: none;
+    stroke: color-mix(in srgb, var(--text) 72%, transparent);
+    stroke-width: 1.6;
+}
+
+.battery-tip {
+    fill: color-mix(in srgb, var(--text) 58%, transparent);
+}
+
+.battery-level {
+    fill: var(--success);
+    transition: width 220ms ease, fill 220ms ease;
+}
+
+.battery-text {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    min-width: 36px;
+    text-align: right;
+}
+
+.device-battery.is-mid .battery-level {
+    fill: var(--warning);
+}
+
+.device-battery.is-low .battery-level {
+    fill: #ef4444;
+}
+
+.device-battery.is-unknown .battery-level {
+    fill: var(--neutral);
 }
 
 .device-name {
@@ -461,5 +521,14 @@ h1 {
 @media (max-width: 720px) {
     .device-metrics {
         grid-template-columns: 1fr;
+    }
+
+    .device-battery {
+        padding: 7px 9px;
+    }
+
+    .battery-text {
+        font-size: 12px;
+        min-width: 32px;
     }
 }
