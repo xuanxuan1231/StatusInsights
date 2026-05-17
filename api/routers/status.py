@@ -10,7 +10,7 @@ class DeviceStatusRequest(BaseModel):
     device_id: str
     status: str
     battery: Optional[int] = None
-    signal_strength: Optional[int] = None
+    signal_level: Optional[int] = None
     network_type: Optional[Literal['wifi', 'cellular', 'ethernet', 'none', 'unknown']] = None
     model_config = ConfigDict(extra='allow')
 
@@ -27,7 +27,7 @@ class DeviceSummary(BaseModel):
     description: Optional[str]
     status: Optional[str]
     battery: Optional[int] = None
-    signal_strength: Optional[int] = None
+    signal_level: Optional[int] = None
     network_type: Optional[Literal['wifi', 'cellular', 'ethernet', 'none', 'unknown']] = None
     last_report_time: Optional[float] = None
 
@@ -75,7 +75,7 @@ def set_device_status(request: DeviceStatusRequest):
             request.device_id,
             request.status,
             battery=request.battery,
-            signal_strength=request.signal_strength,
+            signal_level=request.signal_level,
             network_type=request.network_type,
         )
     except RuntimeError as exc:
@@ -112,7 +112,7 @@ def get_summary():
                 description=device.get('description'),
                 status=status_map.get(device['id']),
                 battery=device_status.get('battery') if isinstance(device_status, dict) else None,
-                signal_strength=device_status.get('signal_strength') if isinstance(device_status, dict) else None,
+                signal_level=device_status.get('signal_level') if isinstance(device_status, dict) else None,
                 network_type=device_status.get('network_type') if isinstance(device_status, dict) else None,
                 last_report_time=device_status.get('last_report_time') if isinstance(device_status, dict) else None,
             )

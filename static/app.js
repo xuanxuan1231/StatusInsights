@@ -65,6 +65,20 @@ function formatSignal(value) {
     return `${value}`;
 }
 
+function signalToneClass(value) {
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) return "is-unknown";
+    if (parsed <= 1) return "is-low";
+    if (parsed <= 3) return "is-mid";
+    return "is-high";
+}
+
+function signalLevel(value) {
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) return 0;
+    return Math.max(0, Math.min(5, Math.round(parsed)));
+}
+
 function formatNetworkType(value) {
     if (!value) return "--";
     const map = {
@@ -90,6 +104,31 @@ function appendMetric(parent, labelText, valueText) {
     metric.appendChild(label);
     metric.appendChild(value);
     parent.appendChild(metric);
+}
+
+function setupAutoMarquee(container, text) {
+    container.textContent = "";
+    const track = document.createElement("div");
+    track.className = "auto-marquee-track";
+
+    const primary = document.createElement("span");
+    primary.className = "auto-marquee-text";
+    primary.textContent = text;
+    track.appendChild(primary);
+    container.appendChild(track);
+
+    requestAnimationFrame(() => {
+        if (primary.scrollWidth <= container.clientWidth) {
+            return;
+        }
+        container.classList.add("is-marquee");
+        const clone = primary.cloneNode(true);
+        track.appendChild(clone);
+        const travel = primary.scrollWidth + 28;
+        track.style.setProperty("--marquee-distance", `${travel}px`);
+        const duration = Math.max(8, travel / 26);
+        track.style.setProperty("--marquee-duration", `${duration}s`);
+    });
 }
 
 function setBadgeClass(el, tone) {
@@ -203,8 +242,11 @@ function renderDevices(devices) {
             topRow.appendChild(image);
         }
 
+        const telemetry = document.createElement("div");
+        telemetry.className = "device-telemetry";
+
         const battery = document.createElement("div");
-        battery.className = `device-battery ${batteryToneClass(device.battery)}`;
+        battery.className = `device-chip device-battery ${batteryToneClass(device.battery)}`;
         battery.innerHTML = `
             <svg class="battery-icon" viewBox="0 0 28 16" aria-hidden="true">
                 <rect class="battery-shell" x="1" y="2" width="23" height="12" rx="4"></rect>
@@ -220,15 +262,33 @@ function renderDevices(devices) {
                 batteryLevelEl.setAttribute("width", String(18 * (percent / 100)));
             }
         }
-        topRow.appendChild(battery);
+        telemetry.appendChild(battery);
+
+        const signal = document.createElement("div");
+        const signalValue = device.signal_level;
+        signal.className = `device-chip device-signal ${signalToneClass(signalValue)}`;
+        signal.dataset.level = String(signalLevel(signalValue));
+        signal.innerHTML = `
+            <svg class="signal-icon" viewBox="0 0 28 16" aria-hidden="true">
+                <rect class="signal-shell" x="1" y="2" width="26" height="12" rx="4"></rect>
+                <rect class="signal-bar" x="4" y="10.9" width="2.8" height="2.9" rx="1.2"></rect>
+                <rect class="signal-bar" x="8.7" y="9.2" width="2.8" height="4.6" rx="1.2"></rect>
+                <rect class="signal-bar" x="13.4" y="7.5" width="2.8" height="6.3" rx="1.2"></rect>
+                <rect class="signal-bar" x="18.1" y="5.8" width="2.8" height="8" rx="1.2"></rect>
+                <rect class="signal-bar" x="22.8" y="4.1" width="2.8" height="9.7" rx="1.2"></rect>
+            </svg>
+            <span class="chip-text chip-network-text">${formatNetworkType(device.network_type)}</span>
+        `;
+        telemetry.appendChild(signal);
+        topRow.appendChild(telemetry);
 
         const name = document.createElement("div");
         name.className = "device-name";
-        name.textContent = device.name || device.device_id;
+        setupAutoMarquee(name, device.name || device.device_id);
 
         const description = document.createElement("div");
         description.className = "device-description caption";
-        description.textContent = device.description || "暂无描述";
+        setupAutoMarquee(description, device.description || "暂无描述");
 
         const divider = document.createElement("div");
         divider.className = "device-divider";
@@ -244,9 +304,6 @@ function renderDevices(devices) {
 
         const metrics = document.createElement("div");
         metrics.className = "device-metrics";
-        appendMetric(metrics, "电量", formatPercent(device.battery));
-        appendMetric(metrics, "当前网络信号", formatSignal(device.signal_strength));
-        appendMetric(metrics, "网络类型", formatNetworkType(device.network_type));
         appendMetric(metrics, "最后上报时间", formatDateTime(device.last_report_time));
 
         card.appendChild(topRow);

@@ -288,7 +288,8 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    min-height: 160px;
+    min-height: 180px;
+    min-width: 320px;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background var(--surface-transition) ease, border-color var(--surface-transition) ease;
 }
 
@@ -304,6 +305,14 @@ h1 {
     gap: 12px;
 }
 
+.device-telemetry {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
 .device-image {
     width: 48px;
     height: 48px;
@@ -314,20 +323,32 @@ h1 {
     transition: background var(--surface-transition) ease;
 }
 
-.device-battery {
+.device-chip {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 10px;
+    padding: 8px 11px;
+    min-height: 34px;
     border-radius: 14px;
     border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
     background: linear-gradient(145deg, color-mix(in srgb, var(--card-glass-a) 95%, transparent), color-mix(in srgb, var(--card-glass-b) 92%, transparent));
     backdrop-filter: blur(8px);
 }
 
+.chip-text {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    min-width: 36px;
+    text-align: right;
+    white-space: nowrap;
+    line-height: 1;
+}
+
 .battery-icon {
-    width: 30px;
-    height: 18px;
+    width: 26px;
+    height: 16px;
     display: block;
 }
 
@@ -347,34 +368,111 @@ h1 {
 }
 
 .battery-text {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: var(--text);
     min-width: 36px;
-    text-align: right;
 }
 
-.device-battery.is-mid .battery-level {
+.chip-network-text {
+    min-width: 52px;
+}
+
+.device-chip.is-mid .battery-level {
     fill: var(--warning);
 }
 
-.device-battery.is-low .battery-level {
+.device-chip.is-low .battery-level {
     fill: #ef4444;
 }
 
-.device-battery.is-unknown .battery-level {
+.device-chip.is-unknown .battery-level {
     fill: var(--neutral);
+}
+
+.signal-icon {
+    width: 26px;
+    height: 16px;
+    display: block;
+}
+
+.signal-shell {
+    fill: none;
+    stroke: color-mix(in srgb, var(--text) 72%, transparent);
+    stroke-width: 1.35;
+}
+
+.signal-bar {
+    fill: color-mix(in srgb, var(--text) 24%, transparent);
+    transition: fill 220ms ease;
+}
+
+.device-signal[data-level="1"] .signal-bar:nth-of-type(-n+1),
+.device-signal[data-level="2"] .signal-bar:nth-of-type(-n+2),
+.device-signal[data-level="3"] .signal-bar:nth-of-type(-n+3),
+.device-signal[data-level="4"] .signal-bar:nth-of-type(-n+4),
+.device-signal[data-level="5"] .signal-bar:nth-of-type(-n+5) {
+    fill: var(--success);
+}
+
+.device-chip.is-low .signal-bar,
+.device-chip.is-mid .signal-bar,
+.device-chip.is-unknown .signal-bar {
+    fill: var(--neutral);
+}
+
+.device-chip.is-low.device-signal[data-level="1"] .signal-bar:nth-of-type(-n+1),
+.device-chip.is-low.device-signal[data-level="2"] .signal-bar:nth-of-type(-n+2) {
+    fill: #ef4444;
+}
+
+.device-chip.is-mid.device-signal[data-level="3"] .signal-bar:nth-of-type(-n+3),
+.device-chip.is-mid.device-signal[data-level="4"] .signal-bar:nth-of-type(-n+4) {
+    fill: var(--warning);
+}
+
+.device-chip.is-high.device-signal[data-level="5"] .signal-bar:nth-of-type(-n+5) {
+    fill: var(--success);
 }
 
 .device-name {
     font-size: 28px;
     font-weight: 600;
+    max-width: 100%;
+    overflow: hidden;
+    overflow-y: hidden;
+    white-space: nowrap;
 }
 
 .device-description {
     margin-top: 0;
     font-size: 16px;
+    max-width: 100%;
+    overflow: hidden;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+
+.auto-marquee-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 28px;
+    min-width: 100%;
+    transform: translateX(0);
+}
+
+.auto-marquee-text {
+    flex: 0 0 auto;
+}
+
+.is-marquee .auto-marquee-track {
+    animation: autoMarquee var(--marquee-duration, 10s) linear infinite;
+}
+
+@keyframes autoMarquee {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(calc(-1 * var(--marquee-distance, 160px)));
+    }
 }
 
 .device-divider {
@@ -482,6 +580,10 @@ h1 {
         animation: none;
     }
 
+    .is-marquee .auto-marquee-track {
+        animation: none;
+    }
+
     .card:hover,
     .device-card:hover {
         transform: none;
@@ -491,7 +593,7 @@ h1 {
 
 .device-metrics {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 10px;
     margin-top: 6px;
 }
@@ -523,12 +625,16 @@ h1 {
         grid-template-columns: 1fr;
     }
 
-    .device-battery {
+    .device-chip {
         padding: 7px 9px;
     }
 
-    .battery-text {
+    .chip-text {
         font-size: 12px;
         min-width: 32px;
+    }
+
+    .device-card {
+        min-width: 0;
     }
 }
