@@ -367,14 +367,6 @@ h1 {
     transition: width 220ms ease, fill 220ms ease;
 }
 
-.battery-text {
-    min-width: 36px;
-}
-
-.chip-network-text {
-    min-width: 52px;
-}
-
 .device-chip.is-mid .battery-level {
     fill: var(--warning);
 }
@@ -391,12 +383,6 @@ h1 {
     width: 26px;
     height: 16px;
     display: block;
-}
-
-.signal-shell {
-    fill: none;
-    stroke: color-mix(in srgb, var(--text) 72%, transparent);
-    stroke-width: 1.35;
 }
 
 .signal-bar {

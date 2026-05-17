@@ -253,7 +253,7 @@ function renderDevices(devices) {
                 <rect class="battery-tip" x="24.8" y="5.2" width="2.2" height="5.6" rx="1.1"></rect>
                 <rect class="battery-level" x="3.3" y="4.3" width="18" height="7.4" rx="2.4"></rect>
             </svg>
-            <span class="battery-text">${formatPercent(device.battery)}</span>
+            <span class="chip-text">${formatPercent(device.battery)}</span>
         `;
         const batteryLevelEl = battery.querySelector(".battery-level");
         if (batteryLevelEl && device.battery !== null && device.battery !== undefined && device.battery !== "") {
@@ -270,14 +270,13 @@ function renderDevices(devices) {
         signal.dataset.level = String(signalLevel(signalValue));
         signal.innerHTML = `
             <svg class="signal-icon" viewBox="0 0 28 16" aria-hidden="true">
-                <rect class="signal-shell" x="1" y="2" width="26" height="12" rx="4"></rect>
                 <rect class="signal-bar" x="4" y="10.9" width="2.8" height="2.9" rx="1.2"></rect>
                 <rect class="signal-bar" x="8.7" y="9.2" width="2.8" height="4.6" rx="1.2"></rect>
                 <rect class="signal-bar" x="13.4" y="7.5" width="2.8" height="6.3" rx="1.2"></rect>
                 <rect class="signal-bar" x="18.1" y="5.8" width="2.8" height="8" rx="1.2"></rect>
                 <rect class="signal-bar" x="22.8" y="4.1" width="2.8" height="9.7" rx="1.2"></rect>
             </svg>
-            <span class="chip-text chip-network-text">${formatNetworkType(device.network_type)}</span>
+            <span class="chip-text">${formatNetworkType(device.network_type)}</span>
         `;
         telemetry.appendChild(signal);
         topRow.appendChild(telemetry);
