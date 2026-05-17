@@ -30,6 +30,7 @@ class DeviceSummary(BaseModel):
     signal_level: Optional[int] = None
     network_type: Optional[Literal['wifi', 'cellular', 'ethernet', 'none', 'unknown']] = None
     last_report_time: Optional[float] = None
+    is_online: bool = False
 
 
 class SummaryResponse(BaseModel):
@@ -93,15 +94,13 @@ def get_device_status(device_id: str):
 @router.get('/summary', response_model=SummaryResponse)
 def get_summary():
     person_status, person_description = status_data.get_person_status()
+    all_statuses = status_data.get_all_device_statuses(online_only=False)
     online_statuses = status_data.get_all_device_statuses(online_only=True)
-    status_map = {item['id']: item.get('status') for item in online_statuses if 'id' in item}
-    device_status_map = {item['id']: item for item in online_statuses if 'id' in item}
-    online_ids = set(status_map.keys())
+    online_ids = {item['id'] for item in online_statuses if 'id' in item}
+    device_status_map = {item['id']: item for item in all_statuses if 'id' in item}
     device_summaries: list[DeviceSummary] = []
     for device in get_all_devices():
         if not isinstance(device, dict) or 'id' not in device:
-            continue
-        if device['id'] not in online_ids:
             continue
         device_status = device_status_map.get(device['id'], {})
         device_summaries.append(
@@ -110,11 +109,12 @@ def get_summary():
                 name=device['name'],
                 device_type=device['type'],
                 description=device.get('description'),
-                status=status_map.get(device['id']),
+                status=device_status.get('status') if isinstance(device_status, dict) else None,
                 battery=device_status.get('battery') if isinstance(device_status, dict) else None,
                 signal_level=device_status.get('signal_level') if isinstance(device_status, dict) else None,
                 network_type=device_status.get('network_type') if isinstance(device_status, dict) else None,
                 last_report_time=device_status.get('last_report_time') if isinstance(device_status, dict) else None,
+                is_online=device['id'] in online_ids,
             )
         )
     return SummaryResponse(

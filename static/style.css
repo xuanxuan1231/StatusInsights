@@ -468,17 +468,15 @@ h1 {
     transition: background var(--surface-transition) ease;
 }
 
-.device-usage {
-    font-size: 14px;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-}
-
 .device-status {
     font-size: 18px;
     font-weight: 600;
     overflow: hidden;
     white-space: nowrap;
+}
+
+.device-status.offline {
+    color: #f97316;
 }
 
 .refresh {
