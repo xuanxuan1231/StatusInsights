@@ -276,6 +276,9 @@ function renderDevices(devices) {
                     <rect class="battery-tip" x="24.8" y="5.2" width="2.2" height="5.6" rx="1.1"></rect>
                     <rect class="battery-level" x="3.3" y="4.3" width="18" height="7.4" rx="2.4"></rect>
                 </svg>
+                <svg class="charging-icon" viewBox="0 0 12 16" aria-hidden="true">
+                    <path d="M7.2 0.8 2.9 8.2h2.5L4.8 15.2l4.3-7.4H6.6z"></path>
+                </svg>
                 <span class="chip-text"></span>
             `;
             telemetry.appendChild(battery);
@@ -337,6 +340,7 @@ function renderDevices(devices) {
         const battery = card.querySelector(".device-battery");
         if (battery) {
             battery.className = `device-chip device-battery ${batteryToneClass(device.battery)}`;
+            battery.classList.toggle("is-charging", device.is_charging === true);
             const batteryText = battery.querySelector(".chip-text");
             if (batteryText) batteryText.textContent = formatPercent(device.battery);
             const batteryLevelEl = battery.querySelector(".battery-level");

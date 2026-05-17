@@ -62,6 +62,8 @@ def _normalize_device_status(document: dict[str, object], device_id: str) -> dic
     except (TypeError, ValueError):
         last_seen = 0.0
     battery = _coerce_optional_int(document.get("battery"))
+    is_charging_raw = document.get("is_charging")
+    is_charging = bool(is_charging_raw) if isinstance(is_charging_raw, bool) else None
     signal_level_raw = document.get("signal_level")
     signal_level = _coerce_optional_int(signal_level_raw)
     network_type = document.get("network_type")
@@ -73,6 +75,7 @@ def _normalize_device_status(document: dict[str, object], device_id: str) -> dic
         "status": status,
         "last_seen": last_seen,
         "battery": battery,
+        "is_charging": is_charging,
         "signal_level": signal_level,
         "network_type": network_type,
         "last_report_time": last_report_time,
@@ -83,6 +86,7 @@ def set_device_status(
     device_id: str,
     status: str,
     battery: Optional[int] = None,
+    is_charging: Optional[bool] = None,
     signal_level: Optional[int] = None,
     network_type: Optional[str] = None,
 ):
@@ -93,6 +97,7 @@ def set_device_status(
         "status": status,
         "last_seen": now,
         "battery": _coerce_optional_int(battery),
+        "is_charging": is_charging if isinstance(is_charging, bool) else None,
         "signal_level": _coerce_optional_int(signal_level),
         "network_type": network_type if network_type in {"wifi", "cellular", "ethernet", "none", "unknown"} else None,
         "last_report_time": now,
