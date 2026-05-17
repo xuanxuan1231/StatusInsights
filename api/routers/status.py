@@ -2,13 +2,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 import data.status as status_data
 from data.config import require_api_key, NAME
 from data.device import get_all as get_all_devices
-from typing import Optional
-from pydantic import BaseModel
+from typing import Optional, Literal
+from pydantic import BaseModel, ConfigDict
 
 
 class DeviceStatusRequest(BaseModel):
     device_id: str
     status: str
+    battery: Optional[int] = None
+    signal_strength: Optional[int] = None
+    network_type: Optional[Literal['wifi', 'cellular', 'ethernet', 'none', 'unknown']] = None
+    model_config = ConfigDict(extra='allow')
 
 
 class PersonStatus(BaseModel):
@@ -22,6 +26,10 @@ class DeviceSummary(BaseModel):
     device_type: str
     description: Optional[str]
     status: Optional[str]
+    battery: Optional[int] = None
+    signal_strength: Optional[int] = None
+    network_type: Optional[Literal['wifi', 'cellular', 'ethernet', 'none', 'unknown']] = None
+    last_report_time: Optional[float] = None
 
 
 class SummaryResponse(BaseModel):
@@ -63,7 +71,13 @@ def unset_person_status():
 @router.post('/device/set', dependencies=[Depends(require_api_key)], status_code=201)
 def set_device_status(request: DeviceStatusRequest):
     try:
-        status_data.set_device_status(request.device_id, request.status)
+        status_data.set_device_status(
+            request.device_id,
+            request.status,
+            battery=request.battery,
+            signal_strength=request.signal_strength,
+            network_type=request.network_type,
+        )
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
@@ -81,6 +95,7 @@ def get_summary():
     person_status, person_description = status_data.get_person_status()
     online_statuses = status_data.get_all_device_statuses(online_only=True)
     status_map = {item['id']: item.get('status') for item in online_statuses if 'id' in item}
+    device_status_map = {item['id']: item for item in online_statuses if 'id' in item}
     online_ids = set(status_map.keys())
     device_summaries: list[DeviceSummary] = []
     for device in get_all_devices():
@@ -88,6 +103,7 @@ def get_summary():
             continue
         if device['id'] not in online_ids:
             continue
+        device_status = device_status_map.get(device['id'], {})
         device_summaries.append(
             DeviceSummary(
                 device_id=device['id'],
@@ -95,6 +111,10 @@ def get_summary():
                 device_type=device['type'],
                 description=device.get('description'),
                 status=status_map.get(device['id']),
+                battery=device_status.get('battery') if isinstance(device_status, dict) else None,
+                signal_strength=device_status.get('signal_strength') if isinstance(device_status, dict) else None,
+                network_type=device_status.get('network_type') if isinstance(device_status, dict) else None,
+                last_report_time=device_status.get('last_report_time') if isinstance(device_status, dict) else None,
             )
         )
     return SummaryResponse(
