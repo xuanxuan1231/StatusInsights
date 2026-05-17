@@ -428,3 +428,38 @@ h1 {
         box-shadow: var(--shadow);
     }
 }
+
+.device-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.device-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.device-metric span {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.device-metric strong {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text);
+    word-break: break-word;
+}
+
+@media (max-width: 720px) {
+    .device-metrics {
+        grid-template-columns: 1fr;
+    }
+}

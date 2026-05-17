@@ -32,6 +32,58 @@ function formatTime(date) {
     return `${hours}:${minutes}:${seconds}`;
 }
 
+function formatDateTime(value) {
+    if (value === null || value === undefined || value === "") {
+        return "暂无上报时间";
+    }
+    const date = new Date(Number(value) * 1000);
+    if (Number.isNaN(date.getTime())) {
+        return "暂无上报时间";
+    }
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${formatTime(date)}`;
+}
+
+function formatPercent(value) {
+    if (value === null || value === undefined || value === "") {
+        return "--";
+    }
+    return `${value}%`;
+}
+
+function formatSignal(value) {
+    if (value === null || value === undefined || value === "") {
+        return "--";
+    }
+    return `${value}`;
+}
+
+function formatNetworkType(value) {
+    if (!value) return "--";
+    const map = {
+        wifi: "Wi-Fi",
+        cellular: "蜂窝网络",
+        ethernet: "有线网络",
+        none: "无网络",
+        unknown: "未知",
+    };
+    return map[value] || "未知";
+}
+
+function appendMetric(parent, labelText, valueText) {
+    const metric = document.createElement("div");
+    metric.className = "device-metric";
+
+    const label = document.createElement("span");
+    label.textContent = labelText;
+
+    const value = document.createElement("strong");
+    value.textContent = valueText;
+
+    metric.appendChild(label);
+    metric.appendChild(value);
+    parent.appendChild(metric);
+}
+
 function setBadgeClass(el, tone) {
     el.classList.remove("success", "warning", "neutral");
     if (tone) {
@@ -160,11 +212,19 @@ function renderDevices(devices) {
         status.textContent = device.status || "无状态";
         setBadgeClass(status, statusTone(device.status));
 
+        const metrics = document.createElement("div");
+        metrics.className = "device-metrics";
+        appendMetric(metrics, "电量", formatPercent(device.battery));
+        appendMetric(metrics, "当前网络信号", formatSignal(device.signal_strength));
+        appendMetric(metrics, "网络类型", formatNetworkType(device.network_type));
+        appendMetric(metrics, "最后上报时间", formatDateTime(device.last_report_time));
+
         card.appendChild(name);
         card.appendChild(description);
         card.appendChild(divider);
         card.appendChild(usage);
         card.appendChild(status);
+        card.appendChild(metrics);
         deviceListEl.appendChild(card);
     });
 }

@@ -34,15 +34,73 @@ def _sanitize_statuses() -> None:
     ]
 
 
-def set_device_status(device_id: str, status: str):
+def _coerce_optional_int(value: object) -> Optional[int]:
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _coerce_optional_float(value: object) -> Optional[float]:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _normalize_device_status(document: dict[str, object], device_id: str) -> dict[str, object]:
+    status = document.get("status")
+    if not isinstance(status, str):
+        status = str(status) if status is not None else "无状态"
+    last_seen_raw = document.get("last_seen")
+    try:
+        last_seen = float(last_seen_raw)
+    except (TypeError, ValueError):
+        last_seen = 0.0
+    battery = _coerce_optional_int(document.get("battery"))
+    signal_strength = _coerce_optional_int(document.get("signal_strength"))
+    network_type = document.get("network_type")
+    if network_type not in {"wifi", "cellular", "ethernet", "none", "unknown", None}:
+        network_type = "unknown"
+    last_report_time = _coerce_optional_float(document.get("last_report_time"))
+    return {
+        "id": device_id,
+        "status": status,
+        "last_seen": last_seen,
+        "battery": battery,
+        "signal_strength": signal_strength,
+        "network_type": network_type,
+        "last_report_time": last_report_time,
+    }
+
+
+def set_device_status(
+    device_id: str,
+    status: str,
+    battery: Optional[int] = None,
+    signal_strength: Optional[int] = None,
+    network_type: Optional[str] = None,
+):
     global DEVICE_STATUSES
     get_device(device_id)  # 检查设备是否已经注册
     now = time.time()
+    payload = {
+        "status": status,
+        "last_seen": now,
+        "battery": _coerce_optional_int(battery),
+        "signal_strength": _coerce_optional_int(signal_strength),
+        "network_type": network_type if network_type in {"wifi", "cellular", "ethernet", "none", "unknown"} else None,
+        "last_report_time": now,
+    }
     if _device_status_collection is not None:
         try:
             _device_status_collection.replace_one(
                 {"_id": device_id},
-                {"status": status, "last_seen": now},
+                payload,
                 upsert=True,
             )
             return
@@ -51,10 +109,9 @@ def set_device_status(device_id: str, status: str):
     _sanitize_statuses()
     for device_status in DEVICE_STATUSES:
         if device_status['id'] == device_id:
-            device_status['status'] = status
-            device_status['last_seen'] = now
+            device_status.update(payload)
             return
-    DEVICE_STATUSES.append({'id': device_id, 'status': status, 'last_seen': now})
+    DEVICE_STATUSES.append({'id': device_id, **payload})
 
 
 def get_device_status(device_id: str) -> Optional[dict[str, object]]:
@@ -63,15 +120,7 @@ def get_device_status(device_id: str) -> Optional[dict[str, object]]:
         try:
             document = _device_status_collection.find_one({"_id": device_id})
             if isinstance(document, dict):
-                status = document.get("status")
-                if not isinstance(status, str):
-                    status = str(status) if status is not None else "无状态"
-                last_seen_raw = document.get("last_seen")
-                try:
-                    last_seen = float(last_seen_raw)
-                except (TypeError, ValueError):
-                    last_seen = 0.0
-                return {"id": device_id, "status": status, "last_seen": last_seen}
+                return _normalize_device_status(document, device_id)
         except Exception as exc:
             print(f"Failed to read device status from MongoDB, falling back to memory: {exc}")
     _sanitize_statuses()
@@ -132,15 +181,7 @@ def get_all_device_statuses(online_only: bool = False) -> list[dict[str, object]
                 device_id = document.get("_id")
                 if not isinstance(device_id, str):
                     continue
-                status = document.get("status")
-                if not isinstance(status, str):
-                    status = str(status) if status is not None else "无状态"
-                last_seen_raw = document.get("last_seen")
-                try:
-                    last_seen = float(last_seen_raw)
-                except (TypeError, ValueError):
-                    last_seen = 0.0
-                parsed_status = {"id": device_id, "status": status, "last_seen": last_seen}
+                parsed_status = _normalize_device_status(document, device_id)
                 if not online_only or _is_online(parsed_status, now):
                     statuses.append(parsed_status)
             return statuses
