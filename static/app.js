@@ -50,6 +50,14 @@ function formatPercent(value) {
     return `${value}%`;
 }
 
+function batteryToneClass(value) {
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) return "is-unknown";
+    if (parsed <= 20) return "is-low";
+    if (parsed <= 50) return "is-mid";
+    return "is-high";
+}
+
 function formatSignal(value) {
     if (value === null || value === undefined || value === "") {
         return "--";
@@ -182,6 +190,9 @@ function renderDevices(devices) {
         const card = document.createElement("div");
         card.className = "device-card";
 
+        const topRow = document.createElement("div");
+        topRow.className = "device-top-row";
+
         const image = document.createElement("img");
         image.className = "device-image";
         const imageSrc = deviceImageSource(device.device_type);
@@ -189,8 +200,27 @@ function renderDevices(devices) {
             image.src = imageSrc;
             image.alt = `${device.device_type || "device"} icon`;
             image.loading = "lazy";
-            card.appendChild(image);
+            topRow.appendChild(image);
         }
+
+        const battery = document.createElement("div");
+        battery.className = `device-battery ${batteryToneClass(device.battery)}`;
+        battery.innerHTML = `
+            <svg class="battery-icon" viewBox="0 0 28 16" aria-hidden="true">
+                <rect class="battery-shell" x="1" y="2" width="23" height="12" rx="4"></rect>
+                <rect class="battery-tip" x="24.8" y="5.2" width="2.2" height="5.6" rx="1.1"></rect>
+                <rect class="battery-level" x="3.3" y="4.3" width="18" height="7.4" rx="2.4"></rect>
+            </svg>
+            <span class="battery-text">${formatPercent(device.battery)}</span>
+        `;
+        const batteryLevelEl = battery.querySelector(".battery-level");
+        if (batteryLevelEl && device.battery !== null && device.battery !== undefined && device.battery !== "") {
+            const percent = Math.max(0, Math.min(100, Number(device.battery)));
+            if (!Number.isNaN(percent)) {
+                batteryLevelEl.setAttribute("width", String(18 * (percent / 100)));
+            }
+        }
+        topRow.appendChild(battery);
 
         const name = document.createElement("div");
         name.className = "device-name";
@@ -219,6 +249,7 @@ function renderDevices(devices) {
         appendMetric(metrics, "网络类型", formatNetworkType(device.network_type));
         appendMetric(metrics, "最后上报时间", formatDateTime(device.last_report_time));
 
+        card.appendChild(topRow);
         card.appendChild(name);
         card.appendChild(description);
         card.appendChild(divider);
