@@ -306,11 +306,11 @@ h1 {
 }
 
 .device-telemetry {
-    display: inline-flex;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, max-content));
     gap: 8px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: end;
+    align-items: start;
 }
 
 .device-image {
@@ -329,6 +329,7 @@ h1 {
     gap: 8px;
     padding: 8px 11px;
     min-height: 34px;
+    max-width: 100%;
     border-radius: 14px;
     border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
     background: linear-gradient(145deg, color-mix(in srgb, var(--card-glass-a) 95%, transparent), color-mix(in srgb, var(--card-glass-b) 92%, transparent));
@@ -607,6 +608,10 @@ h1 {
 }
 
 @media (max-width: 720px) {
+    .device-telemetry {
+        grid-template-columns: 1fr;
+    }
+
     .device-metrics {
         grid-template-columns: 1fr;
     }
