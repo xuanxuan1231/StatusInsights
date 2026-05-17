@@ -304,6 +304,10 @@ function renderDevices(devices) {
             const divider = document.createElement("div");
             divider.className = "device-divider";
 
+            const usage = document.createElement("div");
+            usage.className = "device-usage";
+            usage.textContent = "正在使用";
+
             const status = document.createElement("div");
             status.className = "device-status";
 
@@ -315,6 +319,7 @@ function renderDevices(devices) {
             card.appendChild(name);
             card.appendChild(description);
             card.appendChild(divider);
+            card.appendChild(usage);
             card.appendChild(status);
             card.appendChild(metrics);
             deviceCardMap.set(deviceId, card);
@@ -366,13 +371,16 @@ function renderDevices(devices) {
         if (name) setupAutoMarquee(name, device.name || device.device_id);
         const description = card.querySelector(".device-description");
         if (description) setupAutoMarquee(description, device.description || "暂无描述");
+        const usage = card.querySelector(".device-usage");
         const status = card.querySelector(".device-status");
         if (status) {
             if (device.is_online === false) {
+                if (usage) usage.hidden = true;
                 setupAutoMarquee(status, "设备已离线");
                 status.classList.remove("success", "warning", "neutral");
                 status.classList.add("offline");
             } else {
+                if (usage) usage.hidden = false;
                 setupAutoMarquee(status, device.status || "无状态");
                 status.classList.remove("offline");
                 setBadgeClass(status, statusTone(device.status));
