@@ -16,6 +16,7 @@ const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 let requestSeq = 0;
 let lastRenderedSeq = 0;
 let currentController = null;
+const deviceCardMap = new Map();
 
 function applyCustomFont() {
     const params = new URLSearchParams(window.location.search);
@@ -216,103 +217,154 @@ function initThemeMode() {
 }
 
 function renderDevices(devices) {
-    deviceListEl.innerHTML = "";
     deviceCountEl.textContent = String(devices.length);
     if (!devices.length) {
+        deviceCardMap.forEach((card) => card.remove());
+        deviceCardMap.clear();
         deviceSectionEl.hidden = true;
         deviceEmptyEl.hidden = false;
         return;
     }
     deviceSectionEl.hidden = false;
     deviceEmptyEl.hidden = true;
+    const seenIds = new Set();
     devices.forEach((device) => {
-        const card = document.createElement("div");
-        card.className = "device-card";
+        const deviceId = device.device_id || "";
+        seenIds.add(deviceId);
+        let card = deviceCardMap.get(deviceId);
+        if (!card) {
+            card = document.createElement("div");
+            card.className = "device-card";
+            card.dataset.deviceId = deviceId;
 
-        const topRow = document.createElement("div");
-        topRow.className = "device-top-row";
+            const topRow = document.createElement("div");
+            topRow.className = "device-top-row";
 
-        const image = document.createElement("img");
-        image.className = "device-image";
-        const imageSrc = deviceImageSource(device.device_type);
-        if (imageSrc) {
-            image.src = imageSrc;
-            image.alt = `${device.device_type || "device"} icon`;
+            const image = document.createElement("img");
+            image.className = "device-image";
             image.loading = "lazy";
             topRow.appendChild(image);
+
+            const telemetry = document.createElement("div");
+            telemetry.className = "device-telemetry";
+
+            const battery = document.createElement("div");
+            battery.className = "device-chip device-battery";
+            battery.innerHTML = `
+                <svg class="battery-icon" viewBox="0 0 28 16" aria-hidden="true">
+                    <rect class="battery-shell" x="1" y="2" width="23" height="12" rx="4"></rect>
+                    <rect class="battery-tip" x="24.8" y="5.2" width="2.2" height="5.6" rx="1.1"></rect>
+                    <rect class="battery-level" x="3.3" y="4.3" width="18" height="7.4" rx="2.4"></rect>
+                </svg>
+                <span class="chip-text"></span>
+            `;
+            telemetry.appendChild(battery);
+
+            const signal = document.createElement("div");
+            signal.className = "device-chip device-signal";
+            signal.innerHTML = `
+                <svg class="signal-icon" viewBox="0 0 28 16" aria-hidden="true">
+                    <rect class="signal-bar" x="4" y="10.9" width="2.8" height="2.9" rx="1.2"></rect>
+                    <rect class="signal-bar" x="8.7" y="9.2" width="2.8" height="4.6" rx="1.2"></rect>
+                    <rect class="signal-bar" x="13.4" y="7.5" width="2.8" height="6.3" rx="1.2"></rect>
+                    <rect class="signal-bar" x="18.1" y="5.8" width="2.8" height="8" rx="1.2"></rect>
+                    <rect class="signal-bar" x="22.8" y="4.1" width="2.8" height="9.7" rx="1.2"></rect>
+                </svg>
+                <span class="chip-text"></span>
+            `;
+            telemetry.appendChild(signal);
+            topRow.appendChild(telemetry);
+
+            const name = document.createElement("div");
+            name.className = "device-name";
+
+            const description = document.createElement("div");
+            description.className = "device-description caption";
+
+            const divider = document.createElement("div");
+            divider.className = "device-divider";
+
+            const usage = document.createElement("div");
+            usage.className = "device-usage";
+            usage.textContent = "正在使用";
+
+            const status = document.createElement("div");
+            status.className = "device-status";
+
+            const metrics = document.createElement("div");
+            metrics.className = "device-metrics";
+            appendMetric(metrics, "最后上报时间", "");
+
+            card.appendChild(topRow);
+            card.appendChild(name);
+            card.appendChild(description);
+            card.appendChild(divider);
+            card.appendChild(usage);
+            card.appendChild(status);
+            card.appendChild(metrics);
+            deviceCardMap.set(deviceId, card);
         }
 
-        const telemetry = document.createElement("div");
-        telemetry.className = "device-telemetry";
-
-        const battery = document.createElement("div");
-        battery.className = `device-chip device-battery ${batteryToneClass(device.battery)}`;
-        battery.innerHTML = `
-            <svg class="battery-icon" viewBox="0 0 28 16" aria-hidden="true">
-                <rect class="battery-shell" x="1" y="2" width="23" height="12" rx="4"></rect>
-                <rect class="battery-tip" x="24.8" y="5.2" width="2.2" height="5.6" rx="1.1"></rect>
-                <rect class="battery-level" x="3.3" y="4.3" width="18" height="7.4" rx="2.4"></rect>
-            </svg>
-            <span class="chip-text">${formatPercent(device.battery)}</span>
-        `;
-        const batteryLevelEl = battery.querySelector(".battery-level");
-        if (batteryLevelEl && device.battery !== null && device.battery !== undefined && device.battery !== "") {
-            const percent = Math.max(0, Math.min(100, Number(device.battery)));
-            if (!Number.isNaN(percent)) {
-                batteryLevelEl.setAttribute("width", String(18 * (percent / 100)));
+        const image = card.querySelector(".device-image");
+        const imageSrc = deviceImageSource(device.device_type);
+        if (image) {
+            if (imageSrc) {
+                if (image.src !== `${window.location.origin}${imageSrc}`) {
+                    image.src = imageSrc;
+                }
+                image.alt = `${device.device_type || "device"} icon`;
+                image.hidden = false;
+            } else {
+                image.hidden = true;
             }
         }
-        telemetry.appendChild(battery);
 
-        const signal = document.createElement("div");
-        const signalValue = device.signal_level;
-        signal.className = `device-chip device-signal ${signalToneClass(signalValue)}`;
-        signal.dataset.level = String(signalLevel(signalValue));
-        signal.innerHTML = `
-            <svg class="signal-icon" viewBox="0 0 28 16" aria-hidden="true">
-                <rect class="signal-bar" x="4" y="10.9" width="2.8" height="2.9" rx="1.2"></rect>
-                <rect class="signal-bar" x="8.7" y="9.2" width="2.8" height="4.6" rx="1.2"></rect>
-                <rect class="signal-bar" x="13.4" y="7.5" width="2.8" height="6.3" rx="1.2"></rect>
-                <rect class="signal-bar" x="18.1" y="5.8" width="2.8" height="8" rx="1.2"></rect>
-                <rect class="signal-bar" x="22.8" y="4.1" width="2.8" height="9.7" rx="1.2"></rect>
-            </svg>
-            <span class="chip-text">${formatNetworkType(device.network_type)}</span>
-        `;
-        telemetry.appendChild(signal);
-        topRow.appendChild(telemetry);
+        const battery = card.querySelector(".device-battery");
+        if (battery) {
+            battery.className = `device-chip device-battery ${batteryToneClass(device.battery)}`;
+            const batteryText = battery.querySelector(".chip-text");
+            if (batteryText) batteryText.textContent = formatPercent(device.battery);
+            const batteryLevelEl = battery.querySelector(".battery-level");
+            if (batteryLevelEl) {
+                if (device.battery !== null && device.battery !== undefined && device.battery !== "") {
+                    const percent = Math.max(0, Math.min(100, Number(device.battery)));
+                    if (!Number.isNaN(percent)) {
+                        batteryLevelEl.setAttribute("width", String(18 * (percent / 100)));
+                    }
+                } else {
+                    batteryLevelEl.setAttribute("width", "0");
+                }
+            }
+        }
 
-        const name = document.createElement("div");
-        name.className = "device-name";
-        setupAutoMarquee(name, device.name || device.device_id);
+        const signal = card.querySelector(".device-signal");
+        if (signal) {
+            const signalValue = device.signal_level;
+            signal.className = `device-chip device-signal ${signalToneClass(signalValue)}`;
+            signal.dataset.level = String(signalLevel(signalValue));
+            const signalText = signal.querySelector(".chip-text");
+            if (signalText) signalText.textContent = formatNetworkType(device.network_type);
+        }
 
-        const description = document.createElement("div");
-        description.className = "device-description caption";
-        setupAutoMarquee(description, device.description || "暂无描述");
+        const name = card.querySelector(".device-name");
+        if (name) setupAutoMarquee(name, device.name || device.device_id);
+        const description = card.querySelector(".device-description");
+        if (description) setupAutoMarquee(description, device.description || "暂无描述");
+        const status = card.querySelector(".device-status");
+        if (status) {
+            status.textContent = device.status || "无状态";
+            setBadgeClass(status, statusTone(device.status));
+        }
+        const metricValue = card.querySelector(".device-metric strong");
+        if (metricValue) metricValue.textContent = formatDateTime(device.last_report_time);
 
-        const divider = document.createElement("div");
-        divider.className = "device-divider";
-
-        const usage = document.createElement("div");
-        usage.className = "device-usage";
-        usage.textContent = "正在使用";
-
-        const status = document.createElement("div");
-        status.className = "device-status";
-        status.textContent = device.status || "无状态";
-        setBadgeClass(status, statusTone(device.status));
-
-        const metrics = document.createElement("div");
-        metrics.className = "device-metrics";
-        appendMetric(metrics, "最后上报时间", formatDateTime(device.last_report_time));
-
-        card.appendChild(topRow);
-        card.appendChild(name);
-        card.appendChild(description);
-        card.appendChild(divider);
-        card.appendChild(usage);
-        card.appendChild(status);
-        card.appendChild(metrics);
         deviceListEl.appendChild(card);
+    });
+    Array.from(deviceCardMap.entries()).forEach(([id, card]) => {
+        if (!seenIds.has(id)) {
+            card.remove();
+            deviceCardMap.delete(id);
+        }
     });
 }
 

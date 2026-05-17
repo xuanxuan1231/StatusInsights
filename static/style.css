@@ -300,14 +300,14 @@ h1 {
 
 .device-top-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
 }
 
 .device-telemetry {
     display: inline-flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
     flex-wrap: wrap;
     justify-content: flex-end;
@@ -316,11 +316,11 @@ h1 {
 .device-image {
     width: 48px;
     height: 48px;
+    aspect-ratio: 1 / 1;
     object-fit: contain;
     border-radius: 12px;
-    background: color-mix(in srgb, var(--accent) 12%, transparent);
     align-self: flex-start;
-    transition: background var(--surface-transition) ease;
+    flex: 0 0 48px;
 }
 
 .device-chip {
@@ -336,7 +336,7 @@ h1 {
 }
 
 .chip-text {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.02em;
     color: var(--text);
@@ -616,7 +616,7 @@ h1 {
     }
 
     .chip-text {
-        font-size: 12px;
+        font-size: 13px;
         min-width: 32px;
     }
 
