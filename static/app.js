@@ -17,6 +17,7 @@ let requestSeq = 0;
 let lastRenderedSeq = 0;
 let currentController = null;
 const deviceCardMap = new Map();
+let resizeTimer = null;
 
 function applyCustomFont() {
     const params = new URLSearchParams(window.location.search);
@@ -107,7 +108,17 @@ function appendMetric(parent, labelText, valueText) {
     parent.appendChild(metric);
 }
 
-function setupAutoMarquee(container, text) {
+function setupAutoMarquee(container, text, force = false) {
+    const width = container.clientWidth;
+    const prevText = container.dataset.rawText || "";
+    const prevWidth = Number(container.dataset.rawWidth || "0");
+    if (!force && prevText === text && prevWidth === width && container.firstElementChild) {
+        return;
+    }
+
+    container.classList.remove("is-marquee");
+    container.dataset.rawText = text;
+    container.dataset.rawWidth = String(width);
     container.textContent = "";
     const track = document.createElement("div");
     track.className = "auto-marquee-track";
@@ -129,6 +140,15 @@ function setupAutoMarquee(container, text) {
         track.style.setProperty("--marquee-distance", `${travel}px`);
         const duration = Math.max(8, travel / 26);
         track.style.setProperty("--marquee-duration", `${duration}s`);
+    });
+}
+
+function refreshAllMarquees() {
+    const targets = document.querySelectorAll(".device-name, .device-description, .device-status");
+    targets.forEach((el) => {
+        if (!(el instanceof HTMLElement)) return;
+        const text = el.dataset.rawText || el.textContent || "";
+        setupAutoMarquee(el, text, true);
     });
 }
 
@@ -352,7 +372,7 @@ function renderDevices(devices) {
         if (description) setupAutoMarquee(description, device.description || "暂无描述");
         const status = card.querySelector(".device-status");
         if (status) {
-            status.textContent = device.status || "无状态";
+            setupAutoMarquee(status, device.status || "无状态");
             setBadgeClass(status, statusTone(device.status));
         }
         const metricValue = card.querySelector(".device-metric strong");
@@ -422,3 +442,11 @@ applyCustomFont();
 initThemeMode();
 loadSummary();
 setInterval(loadSummary, REFRESH_MS);
+window.addEventListener("resize", () => {
+    if (resizeTimer) {
+        clearTimeout(resizeTimer);
+    }
+    resizeTimer = setTimeout(() => {
+        refreshAllMarquees();
+    }, 120);
+});
