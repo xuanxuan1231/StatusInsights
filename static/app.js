@@ -3,21 +3,28 @@ const REFRESH_MS = 5000;
 const nameEl = document.getElementById("name");
 const personStatusEl = document.getElementById("person-status");
 const personDescriptionEl = document.getElementById("person-description");
-const deviceSectionEl = document.getElementById("device-section");
 const deviceListEl = document.getElementById("device-list");
 const deviceEmptyEl = document.getElementById("device-empty");
-const deviceCountEl = document.getElementById("device-count");
+const filterButtons = Array.from(document.querySelectorAll(".filter-pill"));
+const filterCountEls = {
+    all: document.getElementById("filter-count-all"),
+    online: document.getElementById("filter-count-online"),
+    offline: document.getElementById("filter-count-offline"),
+};
 const lastUpdatedEl = document.getElementById("last-updated");
 const pulseEl = document.getElementById("pulse");
 const pageEl = document.querySelector(".page");
 const themeButtons = Array.from(document.querySelectorAll(".theme-pill-btn"));
 const THEME_STORAGE_KEY = "statusinsights-theme-mode";
+const FILTER_STORAGE_KEY = "statusinsights-device-filter";
 const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 let requestSeq = 0;
 let lastRenderedSeq = 0;
 let currentController = null;
 const deviceCardMap = new Map();
 let resizeTimer = null;
+let currentFilter = getSavedFilter();
+let lastDevices = [];
 
 function applyCustomFont() {
     const params = new URLSearchParams(window.location.search);
@@ -118,7 +125,6 @@ function setupAutoMarquee(container, text, force = false) {
 
     container.classList.remove("is-marquee");
     container.dataset.rawText = text;
-    container.dataset.rawWidth = String(width);
     container.textContent = "";
     const track = document.createElement("div");
     track.className = "auto-marquee-track";
@@ -130,7 +136,9 @@ function setupAutoMarquee(container, text, force = false) {
     container.appendChild(track);
 
     requestAnimationFrame(() => {
-        if (primary.scrollWidth <= container.clientWidth) {
+        const actualWidth = container.clientWidth;
+        container.dataset.rawWidth = String(actualWidth);
+        if (primary.scrollWidth <= actualWidth) {
             return;
         }
         container.classList.add("is-marquee");
@@ -236,19 +244,77 @@ function initThemeMode() {
     });
 }
 
+function getSavedFilter() {
+    const filter = localStorage.getItem(FILTER_STORAGE_KEY);
+    if (filter === "all" || filter === "online" || filter === "offline") {
+        return filter;
+    }
+    return "all";
+}
+
+function applyFilterButtons() {
+    filterButtons.forEach((button) => {
+        const isActive = button.dataset.filter === currentFilter;
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
+}
+
+function initDeviceFilter() {
+    applyFilterButtons();
+    filterButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const filter = button.dataset.filter;
+            if (filter !== "all" && filter !== "online" && filter !== "offline") {
+                return;
+            }
+            if (filter === currentFilter) return;
+            currentFilter = filter;
+            localStorage.setItem(FILTER_STORAGE_KEY, filter);
+            applyFilterButtons();
+            renderDevices(lastDevices);
+        });
+    });
+}
+
 function renderDevices(devices) {
-    deviceCountEl.textContent = String(devices.length);
-    if (!devices.length) {
+    lastDevices = devices;
+    const totalCount = devices.length;
+    const onlineCount = devices.filter((d) => d.is_online === true).length;
+    const offlineCount = totalCount - onlineCount;
+
+    if (filterCountEls.all) filterCountEls.all.textContent = String(totalCount);
+    if (filterCountEls.online) filterCountEls.online.textContent = String(onlineCount);
+    if (filterCountEls.offline) filterCountEls.offline.textContent = String(offlineCount);
+
+    if (totalCount === 0) {
         deviceCardMap.forEach((card) => card.remove());
         deviceCardMap.clear();
-        deviceSectionEl.hidden = true;
+        deviceListEl.hidden = true;
         deviceEmptyEl.hidden = false;
+        deviceEmptyEl.textContent = "暂无设备";
         return;
     }
-    deviceSectionEl.hidden = false;
+
+    const filtered = devices.filter((device) => {
+        if (currentFilter === "online") return device.is_online === true;
+        if (currentFilter === "offline") return device.is_online === false;
+        return true;
+    });
+
+    if (filtered.length === 0) {
+        deviceCardMap.forEach((card) => card.remove());
+        deviceCardMap.clear();
+        deviceListEl.hidden = true;
+        deviceEmptyEl.hidden = false;
+        deviceEmptyEl.textContent = currentFilter === "online" ? "无在线设备" : "无离线设备";
+        return;
+    }
+
+    deviceListEl.hidden = false;
     deviceEmptyEl.hidden = true;
     const seenIds = new Set();
-    devices.forEach((device) => {
+    filtered.forEach((device) => {
         const deviceId = device.device_id || "";
         seenIds.add(deviceId);
         let card = deviceCardMap.get(deviceId);
@@ -389,7 +455,9 @@ function renderDevices(devices) {
         const metricValue = card.querySelector(".device-metric strong");
         if (metricValue) metricValue.textContent = formatDateTime(device.last_report_time);
 
-        deviceListEl.appendChild(card);
+        if (card.parentNode !== deviceListEl) {
+            deviceListEl.appendChild(card);
+        }
     });
     Array.from(deviceCardMap.entries()).forEach(([id, card]) => {
         if (!seenIds.has(id)) {
@@ -451,6 +519,7 @@ async function loadSummary() {
 
 applyCustomFont();
 initThemeMode();
+initDeviceFilter();
 loadSummary();
 setInterval(loadSummary, REFRESH_MS);
 window.addEventListener("resize", () => {

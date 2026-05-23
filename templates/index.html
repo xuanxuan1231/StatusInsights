@@ -53,12 +53,24 @@
         <section class="device-section" id="device-section" aria-labelledby="device-title">
             <div class="device-header-row">
                 <h2 id="device-title" class="section-title">设备状态</h2>
-                <span class="badge neutral" id="device-count">0</span>
+                <div class="device-filter" role="group" aria-label="设备筛选">
+                    <button type="button" class="filter-pill is-active" data-filter="all" aria-pressed="true">
+                        <span class="filter-label">全部</span>
+                        <span class="filter-count" id="filter-count-all">0</span>
+                    </button>
+                    <button type="button" class="filter-pill" data-filter="online" aria-pressed="false">
+                        <span class="filter-label">在线</span>
+                        <span class="filter-count" id="filter-count-online">0</span>
+                    </button>
+                    <button type="button" class="filter-pill" data-filter="offline" aria-pressed="false">
+                        <span class="filter-label">离线</span>
+                        <span class="filter-count" id="filter-count-offline">0</span>
+                    </button>
+                </div>
             </div>
             <div id="device-list" class="device-grid"></div>
+            <p class="caption empty-state" id="device-empty" hidden>暂无设备</p>
         </section>
-
-        <p class="caption empty-state" id="device-empty">无在线设备</p>
     </main>
 
     <footer class="site-footer">
