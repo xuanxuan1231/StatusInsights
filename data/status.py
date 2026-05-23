@@ -67,8 +67,8 @@ def _normalize_device_status(document: dict[str, object], device_id: str) -> dic
     signal_level_raw = document.get("signal_level")
     signal_level = _coerce_optional_int(signal_level_raw)
     network_type = document.get("network_type")
-    if network_type not in {"wifi", "cellular", "ethernet", "none", "unknown", None}:
-        network_type = "unknown"
+    if network_type not in {"wifi", "cellular", "ethernet"}:
+        network_type = None
     last_report_time = _coerce_optional_float(document.get("last_report_time"))
     return {
         "id": device_id,
@@ -99,7 +99,7 @@ def set_device_status(
         "battery": _coerce_optional_int(battery),
         "is_charging": is_charging if isinstance(is_charging, bool) else None,
         "signal_level": _coerce_optional_int(signal_level),
-        "network_type": network_type if network_type in {"wifi", "cellular", "ethernet", "none", "unknown"} else None,
+        "network_type": network_type if network_type in {"wifi", "cellular", "ethernet"} else None,
         "last_report_time": now,
     }
     if _device_status_collection is not None:

@@ -94,10 +94,8 @@ function formatNetworkType(value) {
         wifi: "Wi-Fi",
         cellular: "蜂窝网络",
         ethernet: "有线网络",
-        none: "无网络",
-        unknown: "未知",
     };
-    return map[value] || "未知";
+    return map[value] || "--";
 }
 
 function appendMetric(parent, labelText, valueText) {
@@ -405,33 +403,47 @@ function renderDevices(devices) {
             }
         }
 
+        const isOffline = device.is_online === false;
+
         const battery = card.querySelector(".device-battery");
         if (battery) {
-            battery.className = `device-chip device-battery ${batteryToneClass(device.battery)}`;
-            battery.classList.toggle("is-charging", device.is_charging === true);
-            battery.classList.toggle("is-charging-unknown", device.is_charging !== true && device.is_charging !== false);
+            const batteryParsed = Number(device.battery);
+            const batteryMissing = device.battery === null
+                || device.battery === undefined
+                || device.battery === ""
+                || Number.isNaN(batteryParsed);
+            const chargingMissing = device.is_charging !== true && device.is_charging !== false;
+            const unknown = isOffline || batteryMissing || chargingMissing;
+            if (unknown) {
+                battery.className = "device-chip device-battery is-unknown";
+            } else {
+                battery.className = `device-chip device-battery ${batteryToneClass(device.battery)}`;
+                battery.classList.toggle("is-charging", device.is_charging === true);
+            }
             const batteryText = battery.querySelector(".chip-text");
-            if (batteryText) batteryText.textContent = formatPercent(device.battery);
+            if (batteryText) batteryText.textContent = unknown ? "--" : formatPercent(device.battery);
             const batteryLevelEl = battery.querySelector(".battery-level");
             if (batteryLevelEl) {
-                if (device.battery !== null && device.battery !== undefined && device.battery !== "") {
-                    const percent = Math.max(0, Math.min(100, Number(device.battery)));
-                    if (!Number.isNaN(percent)) {
-                        batteryLevelEl.setAttribute("width", String(18 * (percent / 100)));
-                    }
-                } else {
+                if (unknown) {
                     batteryLevelEl.setAttribute("width", "0");
+                } else {
+                    const percent = Math.max(0, Math.min(100, batteryParsed));
+                    batteryLevelEl.setAttribute("width", String(18 * (percent / 100)));
                 }
             }
         }
 
         const signal = card.querySelector(".device-signal");
         if (signal) {
-            const signalValue = device.signal_level;
-            signal.className = `device-chip device-signal ${signalToneClass(signalValue)}`;
-            signal.dataset.level = String(signalLevel(signalValue));
+            if (isOffline) {
+                signal.className = "device-chip device-signal is-unknown";
+                signal.dataset.level = "0";
+            } else {
+                signal.className = `device-chip device-signal ${signalToneClass(device.signal_level)}`;
+                signal.dataset.level = String(signalLevel(device.signal_level));
+            }
             const signalText = signal.querySelector(".chip-text");
-            if (signalText) signalText.textContent = formatNetworkType(device.network_type);
+            if (signalText) signalText.textContent = isOffline ? "--" : formatNetworkType(device.network_type);
         }
 
         const name = card.querySelector(".device-name");
@@ -441,7 +453,7 @@ function renderDevices(devices) {
         const usage = card.querySelector(".device-usage");
         const status = card.querySelector(".device-status");
         if (status) {
-            if (device.is_online === false) {
+            if (isOffline) {
                 if (usage) usage.hidden = true;
                 setupAutoMarquee(status, "设备已离线");
                 status.classList.remove("success", "warning", "neutral");

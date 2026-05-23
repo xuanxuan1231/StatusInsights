@@ -426,7 +426,7 @@ h1 {
 
 .battery-level {
     fill: var(--text);
-    transition: width 220ms ease, fill 220ms ease, opacity 220ms ease;
+    transition: width 220ms ease, fill 220ms ease;
 }
 
 .device-chip.is-low .battery-level {
@@ -437,17 +437,13 @@ h1 {
     fill: var(--neutral);
 }
 
-.device-battery.is-charging .battery-level {
-    fill: #22c55e;
-    animation: batteryChargingPulse 1.1s ease-in-out infinite;
-}
-
-.device-battery.is-charging-unknown .battery-shell {
+.device-battery.is-unknown .battery-shell {
     stroke-dasharray: 2.4 1.6;
 }
 
-.device-battery.is-charging-unknown .battery-level {
-    opacity: 0.55;
+.device-battery.is-charging .battery-level {
+    fill: #22c55e;
+    animation: batteryChargingPulse 1.1s ease-in-out infinite;
 }
 
 .signal-icon {

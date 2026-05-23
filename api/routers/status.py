@@ -12,7 +12,7 @@ class DeviceStatusRequest(BaseModel):
     battery: Optional[int] = None
     is_charging: Optional[bool] = None
     signal_level: Optional[int] = None
-    network_type: Optional[Literal['wifi', 'cellular', 'ethernet', 'none', 'unknown']] = None
+    network_type: Optional[Literal['wifi', 'cellular', 'ethernet']] = None
     model_config = ConfigDict(extra='allow')
 
 
@@ -30,7 +30,7 @@ class DeviceSummary(BaseModel):
     battery: Optional[int] = None
     is_charging: Optional[bool] = None
     signal_level: Optional[int] = None
-    network_type: Optional[Literal['wifi', 'cellular', 'ethernet', 'none', 'unknown']] = None
+    network_type: Optional[Literal['wifi', 'cellular', 'ethernet']] = None
     last_report_time: Optional[float] = None
     is_online: bool = False
 
