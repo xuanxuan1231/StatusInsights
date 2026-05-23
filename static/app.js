@@ -98,6 +98,17 @@ function formatNetworkType(value) {
     return map[value] || "--";
 }
 
+function usageLabel(deviceType, applicationName) {
+    if (typeof applicationName === "string" && applicationName.trim()) {
+        return `正在使用 ${applicationName.trim()}`;
+    }
+    const value = (deviceType || "").toLowerCase();
+    if (value === "android" || value === "ios") {
+        return "正在使用手机";
+    }
+    return "正在使用电脑";
+}
+
 function appendMetric(parent, labelText, valueText) {
     const metric = document.createElement("div");
     metric.className = "device-metric";
@@ -150,7 +161,7 @@ function setupAutoMarquee(container, text, force = false) {
 }
 
 function refreshAllMarquees() {
-    const targets = document.querySelectorAll(".device-name, .device-description, .device-status");
+    const targets = document.querySelectorAll(".device-name, .device-description, .device-status, .device-usage");
     targets.forEach((el) => {
         if (!(el instanceof HTMLElement)) return;
         const text = el.dataset.rawText || el.textContent || "";
@@ -370,7 +381,6 @@ function renderDevices(devices) {
 
             const usage = document.createElement("div");
             usage.className = "device-usage";
-            usage.textContent = "正在使用";
 
             const status = document.createElement("div");
             status.className = "device-status";
@@ -459,7 +469,10 @@ function renderDevices(devices) {
                 status.classList.remove("success", "warning", "neutral");
                 status.classList.add("offline");
             } else {
-                if (usage) usage.hidden = false;
+                if (usage) {
+                    usage.hidden = false;
+                    setupAutoMarquee(usage, usageLabel(device.device_type, device.application_name));
+                }
                 setupAutoMarquee(status, device.status || "无状态");
                 status.classList.remove("offline");
                 setBadgeClass(status, statusTone(device.status));

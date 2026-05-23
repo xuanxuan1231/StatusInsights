@@ -69,6 +69,8 @@ def _normalize_device_status(document: dict[str, object], device_id: str) -> dic
     network_type = document.get("network_type")
     if network_type not in {"wifi", "cellular", "ethernet"}:
         network_type = None
+    application_name_raw = document.get("application_name")
+    application_name = application_name_raw if isinstance(application_name_raw, str) and application_name_raw.strip() else None
     last_report_time = _coerce_optional_float(document.get("last_report_time"))
     return {
         "id": device_id,
@@ -78,6 +80,7 @@ def _normalize_device_status(document: dict[str, object], device_id: str) -> dic
         "is_charging": is_charging,
         "signal_level": signal_level,
         "network_type": network_type,
+        "application_name": application_name,
         "last_report_time": last_report_time,
     }
 
@@ -89,6 +92,7 @@ def set_device_status(
     is_charging: Optional[bool] = None,
     signal_level: Optional[int] = None,
     network_type: Optional[str] = None,
+    application_name: Optional[str] = None,
 ):
     global DEVICE_STATUSES
     get_device(device_id)  # 检查设备是否已经注册
@@ -100,6 +104,7 @@ def set_device_status(
         "is_charging": is_charging if isinstance(is_charging, bool) else None,
         "signal_level": _coerce_optional_int(signal_level),
         "network_type": network_type if network_type in {"wifi", "cellular", "ethernet"} else None,
+        "application_name": application_name if isinstance(application_name, str) and application_name.strip() else None,
         "last_report_time": now,
     }
     if _device_status_collection is not None:

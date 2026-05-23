@@ -13,6 +13,7 @@ class DeviceStatusRequest(BaseModel):
     is_charging: Optional[bool] = None
     signal_level: Optional[int] = None
     network_type: Optional[Literal['wifi', 'cellular', 'ethernet']] = None
+    application_name: Optional[str] = None
     model_config = ConfigDict(extra='allow')
 
 
@@ -31,6 +32,7 @@ class DeviceSummary(BaseModel):
     is_charging: Optional[bool] = None
     signal_level: Optional[int] = None
     network_type: Optional[Literal['wifi', 'cellular', 'ethernet']] = None
+    application_name: Optional[str] = None
     last_report_time: Optional[float] = None
     is_online: bool = False
 
@@ -81,6 +83,7 @@ def set_device_status(request: DeviceStatusRequest):
             is_charging=request.is_charging,
             signal_level=request.signal_level,
             network_type=request.network_type,
+            application_name=request.application_name,
         )
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
@@ -117,6 +120,7 @@ def get_summary():
                 is_charging=device_status.get('is_charging') if isinstance(device_status, dict) else None,
                 signal_level=device_status.get('signal_level') if isinstance(device_status, dict) else None,
                 network_type=device_status.get('network_type') if isinstance(device_status, dict) else None,
+                application_name=device_status.get('application_name') if isinstance(device_status, dict) else None,
                 last_report_time=device_status.get('last_report_time') if isinstance(device_status, dict) else None,
                 is_online=device['id'] in online_ids,
             )
