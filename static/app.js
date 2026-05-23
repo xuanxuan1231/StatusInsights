@@ -409,6 +409,7 @@ function renderDevices(devices) {
         if (battery) {
             battery.className = `device-chip device-battery ${batteryToneClass(device.battery)}`;
             battery.classList.toggle("is-charging", device.is_charging === true);
+            battery.classList.toggle("is-charging-unknown", device.is_charging !== true && device.is_charging !== false);
             const batteryText = battery.querySelector(".chip-text");
             if (batteryText) batteryText.textContent = formatPercent(device.battery);
             const batteryLevelEl = battery.querySelector(".battery-level");
