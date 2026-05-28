@@ -191,7 +191,7 @@ function deviceImageSource(type) {
     if (value === "ios" || value === "mac") return "/static/apple.svg";
     if (value === "android") return "/static/android.svg";
     if (value === "linux") return "/static/linux.svg";
-    if (value === "win") return "/static/win.svg";
+    if (value === "windows") return "/static/win.svg";
     return "";
 }
 

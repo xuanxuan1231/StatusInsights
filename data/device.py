@@ -70,7 +70,7 @@ def register(name: str, device_id: str, device_type: str, description: Optional[
     global DEVICES
     if MONGODB_ENABLED:
         update()
-    if device_type not in ['win', 'mac', 'linux', 'ios', 'android', 'unknown']:
+    if device_type not in ['windows', 'mac', 'linux', 'ios', 'android', 'unknown']:
         raise ValueError(f"Invalid device type: {device_type}")
     for device in DEVICES:
         if device['id'] == device_id:
